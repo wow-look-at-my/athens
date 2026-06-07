@@ -15,6 +15,7 @@ import (
 	"golang.org/x/mod/sumdb"
 	"golang.org/x/mod/sumdb/tlog"
 
+	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/wow-look-at-my/testify/assert"
 	"github.com/wow-look-at-my/testify/require"
@@ -59,7 +60,7 @@ func setupTestServer(t *testing.T) (*Server, string) {
 	err := store.Save(ctx, "example.com/foo", "v1.0.0", modContent, bytes.NewReader(zipData), nil, []byte(`{"Version":"v1.0.0"}`))
 	require.Nil(t, err)
 
-	srv, err := New(dir, "test.athens.local", store)
+	srv, err := New(dir, "test.athens.local", store, nil)
 	require.Nil(t, err)
 	t.Cleanup(func() { srv.Close() })
 
@@ -70,7 +71,7 @@ func TestNew(t *testing.T) {
 	dir := t.TempDir()
 	store, _ := mem.NewStorage()
 
-	srv, err := New(dir, "test.local", store)
+	srv, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	defer srv.Close()
 
@@ -90,7 +91,7 @@ func TestNewReopensExistingState(t *testing.T) {
 	require.Nil(t, store.Save(ctx, "example.com/bar", "v1.0.0", modContent, bytes.NewReader(zipData), nil, []byte(`{"Version":"v1.0.0"}`)))
 
 	// Create server and add a record
-	srv1, err := New(dir, "test.local", store)
+	srv1, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	_, err = srv1.Lookup(ctx, module.Version{Path: "example.com/bar", Version: "v1.0.0"})
 	require.Nil(t, err)
@@ -98,7 +99,7 @@ func TestNewReopensExistingState(t *testing.T) {
 	srv1.Close()
 
 	// Reopen with same dir - should preserve state
-	srv2, err := New(dir, "test.local", store)
+	srv2, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	defer srv2.Close()
 
@@ -199,7 +200,7 @@ func TestMultipleRecords(t *testing.T) {
 		require.Nil(t, store.Save(ctx, modPath, "v1.0.0", modContent, bytes.NewReader(zipData), nil, []byte(`{"Version":"v1.0.0"}`)))
 	}
 
-	srv, err := New(dir, "test.local", store)
+	srv, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	defer srv.Close()
 
@@ -322,7 +323,7 @@ func TestServerPaths(t *testing.T) {
 func TestClose(t *testing.T) {
 	dir := t.TempDir()
 	store, _ := mem.NewStorage()
-	srv, err := New(dir, "test.local", store)
+	srv, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	require.Nil(t, srv.Close())
 }
@@ -332,7 +333,7 @@ func TestKeyPersistence(t *testing.T) {
 	store, _ := mem.NewStorage()
 
 	// Create server - generates keys
-	srv1, err := New(dir, "test.local", store)
+	srv1, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	vkey1 := srv1.VerifierKey()
 	srv1.Close()
@@ -344,8 +345,89 @@ func TestKeyPersistence(t *testing.T) {
 	require.Nil(t, err)
 
 	// Reopen - should load same keys
-	srv2, err := New(dir, "test.local", store)
+	srv2, err := New(dir, "test.local", store, nil)
 	require.Nil(t, err)
 	defer srv2.Close()
 	assert.Equal(t, vkey1, srv2.VerifierKey())
+}
+
+// fakeFetcher implements Fetcher by saving a pre-built module into storage the
+// first time it is asked for, mimicking how stash.Stasher populates storage
+// from upstream.
+type fakeFetcher struct {
+	t     *testing.T
+	store storage.Backend
+	calls int
+	zip   []byte
+	gomod []byte
+}
+
+func (f *fakeFetcher) Stash(ctx context.Context, mod, ver string) (string, error) {
+	f.calls++
+	err := f.store.Save(ctx, mod, ver, f.gomod, bytes.NewReader(f.zip), nil, []byte(`{"Version":"`+ver+`"}`))
+	require.Nil(f.t, err)
+	return ver, nil
+}
+
+// TestLookupFetchesOnDemand verifies that a lookup for a module that is not yet
+// in storage triggers the fetcher to download it, then succeeds. This is the
+// path Go relies on when verifying golang.org/toolchain during a toolchain
+// switch: the module may have been downloaded via a GOPROXY "direct" fallback,
+// so it is never stashed through the module endpoints.
+func TestLookupFetchesOnDemand(t *testing.T) {
+	dir := t.TempDir()
+	store, _ := mem.NewStorage()
+	ctx := context.Background()
+
+	const modPath, version = "golang.org/toolchain", "v0.0.1-go1.99.0.linux-amd64"
+	modContent := []byte("module golang.org/toolchain\n\ngo 1.99\n")
+	zipData := makeModuleZip(t, modPath, version, string(modContent))
+
+	fetcher := &fakeFetcher{t: t, store: store, zip: zipData, gomod: modContent}
+
+	srv, err := New(dir, "test.local", store, fetcher)
+	require.Nil(t, err)
+	defer srv.Close()
+
+	// The module is not in storage yet, so the lookup must fetch it.
+	id, err := srv.Lookup(ctx, module.Version{Path: modPath, Version: version})
+	require.Nil(t, err)
+	assert.Equal(t, int64(0), id)
+	assert.Equal(t, 1, fetcher.calls, "fetcher should be called exactly once")
+
+	// The record must carry the real hashes computed from the fetched zip/go.mod.
+	records, err := srv.ReadRecords(ctx, 0, 1)
+	require.Nil(t, err)
+	require.Len(t, records, 1)
+	text := string(records[0])
+	assert.Contains(t, text, modPath+" "+version+" h1:")
+	assert.Contains(t, text, modPath+" "+version+"/go.mod h1:")
+
+	// A second lookup is served from cache without re-fetching.
+	_, err = srv.Lookup(ctx, module.Version{Path: modPath, Version: version})
+	require.Nil(t, err)
+	assert.Equal(t, 1, fetcher.calls, "second lookup should not re-fetch")
+}
+
+// TestLookupFetcherFailureIsNotFound verifies that when the fetcher cannot
+// supply a module, the lookup surfaces a not-found error (which the sumdb HTTP
+// layer turns into a 404) rather than hanging or panicking.
+func TestLookupFetcherFailureIsNotFound(t *testing.T) {
+	dir := t.TempDir()
+	store, _ := mem.NewStorage()
+	ctx := context.Background()
+
+	srv, err := New(dir, "test.local", store, failingFetcher{})
+	require.Nil(t, err)
+	defer srv.Close()
+
+	_, err = srv.Lookup(ctx, module.Version{Path: "example.com/missing", Version: "v1.0.0"})
+	require.NotNil(t, err)
+	assert.True(t, os.IsNotExist(err))
+}
+
+type failingFetcher struct{}
+
+func (failingFetcher) Stash(context.Context, string, string) (string, error) {
+	return "", os.ErrNotExist
 }
