@@ -62,7 +62,7 @@ func (i *indexer) Index(ctx context.Context, mod, ver string) error {
 		`INSERT INTO indexes (path, version, timestamp) VALUES ($1, $2, $3)`,
 		mod,
 		ver,
-		time.Now().Format(time.RFC3339Nano),
+		time.Now().UTC(),
 	)
 	if err != nil {
 		return errors.E(op, err, getKind(err))
@@ -75,13 +75,12 @@ func (i *indexer) Lines(ctx context.Context, since time.Time, limit int) ([]*ind
 	if since.IsZero() {
 		since = time.Unix(0, 0)
 	}
-	sinceStr := since.Format(time.RFC3339Nano)
-	rows, err := i.db.QueryContext(ctx, `SELECT path, version, timestamp FROM indexes WHERE timestamp >= $1 LIMIT $2`, sinceStr, limit)
+	rows, err := i.db.QueryContext(ctx, `SELECT path, version, timestamp FROM indexes WHERE timestamp >= $1 LIMIT $2`, since.UTC(), limit)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 	defer func() { _ = rows.Close() }()
-	var lines []*index.Line
+	lines := []*index.Line{}
 	for rows.Next() {
 		var line index.Line
 		err = rows.Scan(&line.Path, &line.Version, &line.Timestamp)
