@@ -45,41 +45,31 @@ func TestGoGetFetcherInvalidModulePaths(t *testing.T) {
 	}
 }
 
-func TestWithToolchainSumDB(t *testing.T) {
+func TestWithProxyUserAgent(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name string
-		in   []string
-		want []string
-	}{
-		{
-			name: "replaces GOSUMDB=off",
-			in:   []string{"GOPATH=/x", "GOSUMDB=off", "GOPROXY=direct"},
-			want: []string{"GOPATH=/x", "GOSUMDB=sum.golang.org", "GOPROXY=direct"},
-		},
-		{
-			name: "leaves a custom GOSUMDB untouched",
-			in:   []string{"GOSUMDB=corp.example.com+abc123 https://corp.example.com/sumdb"},
-			want: []string{"GOSUMDB=corp.example.com+abc123 https://corp.example.com/sumdb"},
-		},
-		{
-			name: "absent GOSUMDB is left as-is (Go defaults to sum.golang.org)",
-			in:   []string{"GOPATH=/x", "GOPROXY=direct"},
-			want: []string{"GOPATH=/x", "GOPROXY=direct"},
-		},
-		{
-			name: "does not touch unrelated GONOSUMDB/GOFLAGS",
-			in:   []string{"GONOSUMDB=*", "GOFLAGS=-mod=mod", "GOSUMDB=off"},
-			want: []string{"GONOSUMDB=*", "GOFLAGS=-mod=mod", "GOSUMDB=sum.golang.org"},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			assert.Equal(t, tt.want, withToolchainSumDB(tt.in))
-		})
-	}
+	const want = "GIT_HTTP_USER_AGENT=Athens module proxy (proxy.golang.org)"
+
+	t.Run("appends the agent and leaves GOSUMDB=off and other vars alone", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent([]string{"GOPATH=/x", "GOSUMDB=off", "GOPROXY=direct"})
+		// The toolchain is fetched like any other module: GOSUMDB is untouched,
+		// only GIT_HTTP_USER_AGENT is added to trigger cmd/go's proxy exception.
+		assert.Equal(t, []string{"GOPATH=/x", "GOSUMDB=off", "GOPROXY=direct", want}, got)
+	})
+
+	t.Run("replaces any pre-existing GIT_HTTP_USER_AGENT", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent([]string{"GIT_HTTP_USER_AGENT=something", "GOPROXY=direct"})
+		assert.Equal(t, []string{"GOPROXY=direct", want}, got)
+	})
+
+	t.Run("agent carries the substring cmd/go's useSumDB exception matches", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent(nil)
+		require.Len(t, got, 1)
+		assert.Contains(t, got[0], "proxy.golang.org")
+	})
 }
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {

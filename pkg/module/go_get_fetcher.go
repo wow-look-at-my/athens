@@ -156,7 +156,7 @@ func downloadModule(
 	cmd := exec.CommandContext(ctx, goBinaryName, "mod", "download", "-json", fullURI)
 	env := prepareEnv(gopath, envVars)
 	if uri == toolchainModulePath {
-		env = withToolchainSumDB(env)
+		env = withProxyUserAgent(env)
 	}
 	cmd.Env = env
 	cmd.Dir = repoRoot
@@ -191,34 +191,39 @@ func downloadModule(
 }
 
 // toolchainModulePath is the synthetic module Go uses to distribute toolchains
-// for its automatic toolchain switching (since Go 1.21). Go treats this module
-// specially: it always verifies it against a checksum database and ignores the
-// usual opt-outs (GONOSUMCHECK, GONOSUMDB, GOPRIVATE, GOFLAGS=-mod=mod). A
-// fetcher configured with GOSUMDB=off therefore cannot download it at all,
-// failing with "verifying go.mod: checksum database disabled by GOSUMDB=off".
+// for its automatic toolchain switching (since Go 1.21).
 const toolchainModulePath = "golang.org/toolchain"
 
-// publicSumDB is the public Go checksum database, which is authoritative for
-// the golang.org/toolchain module.
-const publicSumDB = "GOSUMDB=sum.golang.org"
+// proxyUserAgent is a GIT_HTTP_USER_AGENT value carrying the substring cmd/go
+// looks for to recognise that the caller is itself a Go module proxy doing the
+// initial toolchain download.
+//
+// cmd/go requires a checksum-database lookup for golang.org/toolchain and
+// ignores GONOSUMCHECK/GONOSUMDB/GOPRIVATE, so under GOSUMDB=off the download
+// otherwise fails with "checksum database disabled by GOSUMDB=off". cmd/go's
+// own escape hatch is "the Go proxy+checksum database cannot check itself while
+// doing the initial download": useSumDB() returns false for the toolchain when
+// GIT_HTTP_USER_AGENT contains "proxy.golang.org". Athens is exactly that -- a
+// module proxy fetching the toolchain to cache and re-serve it -- so we set the
+// agent and let the toolchain be fetched (and hashed by Athens) like any other
+// module, with no checksum database, and therefore no contact with
+// sum.golang.org.
+//
+// See cmd/go/internal/modfetch/sumdb.go, func useSumDB.
+const proxyUserAgent = "GIT_HTTP_USER_AGENT=Athens module proxy (proxy.golang.org)"
 
-// withToolchainSumDB returns env with a disabled checksum database (GOSUMDB=off)
-// replaced by the public sum.golang.org, so that golang.org/toolchain downloads
-// can be verified and thus succeed. Any other GOSUMDB value (a custom or
-// mirrored sumdb) is left untouched, as is an absent GOSUMDB (Go then defaults
-// to sum.golang.org, which already works). This lets Athens mirror the
-// toolchain module like any other even when operators run the fetcher with
-// GOSUMDB=off for privacy on regular modules.
-func withToolchainSumDB(env []string) []string {
-	out := make([]string, len(env))
-	for i, kv := range env {
-		if kv == "GOSUMDB=off" {
-			out[i] = publicSumDB
+// withProxyUserAgent returns env with GIT_HTTP_USER_AGENT set to proxyUserAgent,
+// replacing any existing value, so golang.org/toolchain can be fetched under
+// GOSUMDB=off via cmd/go's proxy self-download exception.
+func withProxyUserAgent(env []string) []string {
+	out := make([]string, 0, len(env)+1)
+	for _, kv := range env {
+		if strings.HasPrefix(kv, "GIT_HTTP_USER_AGENT=") {
 			continue
 		}
-		out[i] = kv
+		out = append(out, kv)
 	}
-	return out
+	return append(out, proxyUserAgent)
 }
 
 func isLimitHit(o string) bool {
