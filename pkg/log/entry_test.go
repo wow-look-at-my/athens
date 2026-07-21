@@ -54,8 +54,8 @@ func TestErrFields(t *testing.T) {
 
 	fields := errFields(athensErr)
 	require.Equal(t, errors.Op("test.op"), fields["operation"])
-	require.Equal(t, "mymod", fields["module"])
-	require.Equal(t, "v1.0.0", fields["version"])
+	require.Equal(t, errors.M("mymod"), fields["module"])
+	require.Equal(t, errors.V("v1.0.0"), fields["version"])
 }
 
 func TestLoggerSystemErr(t *testing.T) {
