@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/requestid"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWithRequestID(t *testing.T) {

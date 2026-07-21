@@ -7,7 +7,7 @@ import (
 
 	"github.com/gomods/athens/pkg/module"
 	"github.com/gorilla/mux"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewFilterMiddleware_NoModule(t *testing.T) {

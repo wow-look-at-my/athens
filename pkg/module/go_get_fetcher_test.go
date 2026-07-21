@@ -11,8 +11,8 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/spf13/afero"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var ctx = context.Background()
@@ -23,8 +23,8 @@ func TestGoGetFetcherInvalidModulePaths(t *testing.T) {
 	require.Nil(t, err)
 
 	tests := []struct {
-		name	string
-		mod	string
+		name string
+		mod  string
 	}{
 		{"bare host", "github.com"},
 		{"host with owner only", "github.com/owner"},
@@ -136,9 +136,9 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	zipBytes, err := os.ReadFile("test_data/mockmod.xyz@v1.2.3.zip")
 	r.NoError(err)
 	mp := &mockProxy{paths: map[string][]byte{
-		"/mockmod.xyz/@v/v1.2.3.info":	[]byte(`{"Version":"v1.2.3"}`),
-		"/mockmod.xyz/@v/v1.2.3.mod":	[]byte(`{"module mod}`),
-		"/mockmod.xyz/@v/v1.2.3.zip":	zipBytes,
+		"/mockmod.xyz/@v/v1.2.3.info": []byte(`{"Version":"v1.2.3"}`),
+		"/mockmod.xyz/@v/v1.2.3.mod":  []byte(`{"module mod}`),
+		"/mockmod.xyz/@v/v1.2.3.zip":  zipBytes,
 	}}
 	proxyAddr, close := s.getProxy(mp)
 	defer close()

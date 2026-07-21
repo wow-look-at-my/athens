@@ -7,7 +7,7 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEntrySystemErr_AthensError(t *testing.T) {

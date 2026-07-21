@@ -5,7 +5,7 @@ import (
 
 	"github.com/gomods/athens/pkg/storage/compliance"
 	"github.com/spf13/afero"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBackend(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"go.opencensus.io/stats/view"
-	"github.com/wow-look-at-my/testify/require"
 )
 
 func TestCacheLookupMetric(t *testing.T) {

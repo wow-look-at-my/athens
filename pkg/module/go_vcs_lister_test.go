@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestVCSListerInvalidModulePaths(t *testing.T) {
@@ -16,8 +16,8 @@ func TestVCSListerInvalidModulePaths(t *testing.T) {
 	lister := NewVCSLister("go", nil, afero.NewMemMapFs(), 30*time.Second)
 
 	tests := []struct {
-		name	string
-		mod	string
+		name string
+		mod  string
 	}{
 		{"bare host", "github.com"},
 		{"host with owner only", "github.com/owner"},

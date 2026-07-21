@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -115,37 +115,37 @@ func TestWithRedisLockWithWrongPassword(t *testing.T) {
 }
 
 type getRedisClientOptionsFacet struct {
-	endpoint	string
-	password	string
-	options		*redis.Options
-	err		error
+	endpoint string
+	password string
+	options  *redis.Options
+	err      error
 }
 
 func Test_getRedisClientOptions(t *testing.T) {
 	facets := []*getRedisClientOptionsFacet{
 		{
-			endpoint:	"127.0.0.1:6379",
+			endpoint: "127.0.0.1:6379",
 			options: &redis.Options{
 				Addr: "127.0.0.1:6379",
 			},
 		},
 		{
-			endpoint:	"127.0.0.1:6379",
-			password:	"1234",
+			endpoint: "127.0.0.1:6379",
+			password: "1234",
 			options: &redis.Options{
-				Addr:		"127.0.0.1:6379",
-				Password:	"1234",
+				Addr:     "127.0.0.1:6379",
+				Password: "1234",
 			},
 		},
 		{
-			endpoint:	"rediss://username:password@127.0.0.1:6379",
-			password:	"1234",	// Ignored because password was parsed
-			err:		errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
+			endpoint: "rediss://username:password@127.0.0.1:6379",
+			password: "1234", // Ignored because password was parsed
+			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
 		},
 		{
-			endpoint:	"rediss://username:password@127.0.0.1:6379",
-			password:	"1234",	// Ignored because password was parsed
-			err:		errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
+			endpoint: "rediss://username:password@127.0.0.1:6379",
+			password: "1234", // Ignored because password was parsed
+			err:      errors.E("stash.WithRedisLock", errPasswordsDoNotMatch),
 		},
 	}
 
@@ -178,13 +178,13 @@ func Test_getRedisClientOptions(t *testing.T) {
 // so that redis can determine
 // whether to call the underlying stasher or not.
 type mockRedisStasher struct {
-	strg	storage.Backend
-	mu	sync.Mutex
-	num	int
+	strg storage.Backend
+	mu   sync.Mutex
+	num  int
 }
 
 func (ms *mockRedisStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
-	time.Sleep(time.Millisecond * 100)	// allow for second requests to come in.
+	time.Sleep(time.Millisecond * 100) // allow for second requests to come in.
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	if ms.num == 0 {

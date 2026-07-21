@@ -11,8 +11,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/wow-look-at-my/testify/require"
-	"github.com/wow-look-at-my/testify/assert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testConfigFile(t *testing.T) (testConfigFile string) {
@@ -61,33 +61,33 @@ func TestPortDefaultsCorrectly(t *testing.T) {
 func TestEnvOverrides(t *testing.T) {
 	os.Clearenv()
 	expConf := &Config{
-		GoEnv:			"production",
-		GoGetWorkers:		10,
-		ProtocolWorkers:	10,
-		LogLevel:		"info",
-		GoBinary:		"go11",
-		CloudRuntime:		"gcp",
+		GoEnv:           "production",
+		GoGetWorkers:    10,
+		ProtocolWorkers: 10,
+		LogLevel:        "info",
+		GoBinary:        "go11",
+		CloudRuntime:    "gcp",
 		TimeoutConf: TimeoutConf{
 			Timeout: 30,
 		},
-		StorageType:		"minio",
-		GlobalEndpoint:		"mytikas.gomods.io",
-		HomeTemplatePath:	"/tmp/athens/home.html",
-		Port:			":7000",
-		EnablePprof:		false,
-		PprofPort:		":3001",
-		BasicAuthUser:		"testuser",
-		BasicAuthPass:		"testpass",
-		ForceSSL:		true,
-		ValidatorHook:		"testhook.io",
-		PathPrefix:		"prefix",
-		NETRCPath:		"/test/path/.netrc",
-		HGRCPath:		"/test/path/.hgrc",
-		Storage:		&Storage{},
-		GoBinaryEnvVars:	[]string{"GOPROXY=direct"},
-		SingleFlight:		&SingleFlight{},
-		RobotsFile:		"robots.txt",
-		Index:			&Index{},
+		StorageType:      "minio",
+		GlobalEndpoint:   "mytikas.gomods.io",
+		HomeTemplatePath: "/tmp/athens/home.html",
+		Port:             ":7000",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
+		BasicAuthUser:    "testuser",
+		BasicAuthPass:    "testpass",
+		ForceSSL:         true,
+		ValidatorHook:    "testhook.io",
+		PathPrefix:       "prefix",
+		NETRCPath:        "/test/path/.netrc",
+		HGRCPath:         "/test/path/.hgrc",
+		Storage:          &Storage{},
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
+		SingleFlight:     &SingleFlight{},
+		RobotsFile:       "robots.txt",
+		Index:            &Index{},
 	}
 
 	envVars := getEnvMap(expConf)
@@ -145,29 +145,29 @@ func TestStorageEnvOverrides(t *testing.T) {
 			RootPath: "/my/root/path",
 		},
 		GCP: &GCPConfig{
-			ProjectID:	"gcpproject",
-			Bucket:		"gcpbucket",
+			ProjectID: "gcpproject",
+			Bucket:    "gcpbucket",
 		},
 		Minio: &MinioConfig{
-			Endpoint:	"minioEndpoint",
-			Key:		"minioKey",
-			Secret:		"minioSecret",
-			EnableSSL:	false,
-			Bucket:		"minioBucket",
-			Region:		"us-west-1",
+			Endpoint:  "minioEndpoint",
+			Key:       "minioKey",
+			Secret:    "minioSecret",
+			EnableSSL: false,
+			Bucket:    "minioBucket",
+			Region:    "us-west-1",
 		},
 		Mongo: &MongoConfig{
-			URL:			"mongoURL",
-			CertPath:		"/test/path",
-			DefaultDBName:		"test",
-			DefaultCollectionName:	"testModules",
+			URL:                   "mongoURL",
+			CertPath:              "/test/path",
+			DefaultDBName:         "test",
+			DefaultCollectionName: "testModules",
 		},
 		S3: &S3Config{
-			Region:	"s3Region",
-			Key:	"s3Key",
-			Secret:	"s3Secret",
-			Token:	"s3Token",
-			Bucket:	"s3Bucket",
+			Region: "s3Region",
+			Key:    "s3Key",
+			Secret: "s3Secret",
+			Token:  "s3Token",
+			Bucket: "s3Bucket",
 		},
 	}
 	envVars := getEnvMap(&Config{Storage: expStorage})
@@ -191,90 +191,90 @@ func TestParseExampleConfig(t *testing.T) {
 			RootPath: "/path/on/disk",
 		},
 		GCP: &GCPConfig{
-			ProjectID:	"MY_GCP_PROJECT_ID",
-			Bucket:		"MY_GCP_BUCKET",
+			ProjectID: "MY_GCP_PROJECT_ID",
+			Bucket:    "MY_GCP_BUCKET",
 		},
 		Minio: &MinioConfig{
-			Endpoint:	"127.0.0.1:9001",
-			Key:		"minio",
-			Secret:		"minio123",
-			EnableSSL:	false,
-			Bucket:		"gomods",
+			Endpoint:  "127.0.0.1:9001",
+			Key:       "minio",
+			Secret:    "minio123",
+			EnableSSL: false,
+			Bucket:    "gomods",
 		},
 		Mongo: &MongoConfig{
-			URL:			"mongodb://127.0.0.1:27017",
-			CertPath:		"",
-			InsecureConn:		false,
-			DefaultDBName:		"athens",
-			DefaultCollectionName:	"modules",
+			URL:                   "mongodb://127.0.0.1:27017",
+			CertPath:              "",
+			InsecureConn:          false,
+			DefaultDBName:         "athens",
+			DefaultCollectionName: "modules",
 		},
 		S3: &S3Config{
-			Region:	"MY_AWS_REGION",
-			Key:	"MY_AWS_ACCESS_KEY_ID",
-			Secret:	"MY_AWS_SECRET_ACCESS_KEY",
-			Token:	"",
-			Bucket:	"MY_S3_BUCKET_NAME",
+			Region: "MY_AWS_REGION",
+			Key:    "MY_AWS_ACCESS_KEY_ID",
+			Secret: "MY_AWS_SECRET_ACCESS_KEY",
+			Token:  "",
+			Bucket: "MY_S3_BUCKET_NAME",
 		},
 		AzureBlob: &AzureBlobConfig{
-			AccountName:			"MY_AZURE_BLOB_ACCOUNT_NAME",
-			AccountKey:			"",
-			ManagedIdentityResourceID:	"",
-			CredentialScope:		"",
-			ContainerName:			"MY_AZURE_BLOB_CONTAINER_NAME",
+			AccountName:               "MY_AZURE_BLOB_ACCOUNT_NAME",
+			AccountKey:                "",
+			ManagedIdentityResourceID: "",
+			CredentialScope:           "",
+			ContainerName:             "MY_AZURE_BLOB_CONTAINER_NAME",
 		},
-		External:	&External{URL: ""},
+		External: &External{URL: ""},
 	}
 
 	expSingleFlight := &SingleFlight{
 		Redis: &Redis{
-			Endpoint:	"127.0.0.1:6379",
-			Password:	"",
-			LockConfig:	DefaultRedisLockConfig(),
+			Endpoint:   "127.0.0.1:6379",
+			Password:   "",
+			LockConfig: DefaultRedisLockConfig(),
 		},
 		RedisSentinel: &RedisSentinel{
-			Endpoints:		[]string{"127.0.0.1:26379"},
-			MasterName:		"redis-1",
-			SentinelPassword:	"sekret",
-			LockConfig:		DefaultRedisLockConfig(),
+			Endpoints:        []string{"127.0.0.1:26379"},
+			MasterName:       "redis-1",
+			SentinelPassword: "sekret",
+			LockConfig:       DefaultRedisLockConfig(),
 		},
-		Etcd:	&Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
-		GCP:	DefaultGCPConfig(),
+		Etcd: &Etcd{Endpoints: "localhost:2379,localhost:22379,localhost:32379"},
+		GCP:  DefaultGCPConfig(),
 	}
 
 	expConf := &Config{
-		GoEnv:			"development",
-		LogLevel:		"debug",
-		LogFormat:		"plain",
-		GoBinary:		"go",
-		GoGetWorkers:		10,
-		ProtocolWorkers:	30,
-		CloudRuntime:		"none",
+		GoEnv:           "development",
+		LogLevel:        "debug",
+		LogFormat:       "plain",
+		GoBinary:        "go",
+		GoGetWorkers:    10,
+		ProtocolWorkers: 30,
+		CloudRuntime:    "none",
 		TimeoutConf: TimeoutConf{
 			Timeout: 300,
 		},
-		StorageType:		"memory",
-		NetworkMode:		"strict",
-		GlobalEndpoint:		"http://localhost:3001",
-		HomeTemplatePath:	"/var/lib/athens/home.html",
-		Port:			":3000",
-		EnablePprof:		false,
-		PprofPort:		":3001",
-		BasicAuthUser:		"",
-		BasicAuthPass:		"",
-		Storage:		expStorage,
-		TraceExporterURL:	"http://localhost:14268",
-		TraceExporter:		"",
-		StatsExporter:		"prometheus",
-		SingleFlightType:	"memory",
-		GoBinaryEnvVars:	[]string{"GOPROXY=direct"},
-		SingleFlight:		expSingleFlight,
-		SumDBs:			[]string{"https://sum.golang.org"},
-		NoSumPatterns:		[]string{},
-		DownloadMode:		"sync",
-		RobotsFile:		"robots.txt",
-		IndexType:		"none",
-		ShutdownTimeout:	60,
-		Index:			&Index{},
+		StorageType:      "memory",
+		NetworkMode:      "strict",
+		GlobalEndpoint:   "http://localhost:3001",
+		HomeTemplatePath: "/var/lib/athens/home.html",
+		Port:             ":3000",
+		EnablePprof:      false,
+		PprofPort:        ":3001",
+		BasicAuthUser:    "",
+		BasicAuthPass:    "",
+		Storage:          expStorage,
+		TraceExporterURL: "http://localhost:14268",
+		TraceExporter:    "",
+		StatsExporter:    "prometheus",
+		SingleFlightType: "memory",
+		GoBinaryEnvVars:  []string{"GOPROXY=direct"},
+		SingleFlight:     expSingleFlight,
+		SumDBs:           []string{"https://sum.golang.org"},
+		NoSumPatterns:    []string{},
+		DownloadMode:     "sync",
+		RobotsFile:       "robots.txt",
+		IndexType:        "none",
+		ShutdownTimeout:  60,
+		Index:            &Index{},
 	}
 
 	absPath, err := filepath.Abs(testConfigFile(t))
@@ -288,13 +288,13 @@ func TestParseExampleConfig(t *testing.T) {
 
 func getEnvMap(config *Config) map[string]string {
 	envVars := map[string]string{
-		"GO_ENV":			config.GoEnv,
-		"GO_BINARY_PATH":		config.GoBinary,
-		"ATHENS_GOGET_WORKERS":		strconv.Itoa(config.GoGetWorkers),
-		"ATHENS_PROTOCOL_WORKERS":	strconv.Itoa(config.ProtocolWorkers),
-		"ATHENS_LOG_LEVEL":		config.LogLevel,
-		"ATHENS_CLOUD_RUNTIME":		config.CloudRuntime,
-		"ATHENS_TIMEOUT":		strconv.Itoa(config.Timeout),
+		"GO_ENV":                  config.GoEnv,
+		"GO_BINARY_PATH":          config.GoBinary,
+		"ATHENS_GOGET_WORKERS":    strconv.Itoa(config.GoGetWorkers),
+		"ATHENS_PROTOCOL_WORKERS": strconv.Itoa(config.ProtocolWorkers),
+		"ATHENS_LOG_LEVEL":        config.LogLevel,
+		"ATHENS_CLOUD_RUNTIME":    config.CloudRuntime,
+		"ATHENS_TIMEOUT":          strconv.Itoa(config.Timeout),
 	}
 
 	envVars["ATHENS_STORAGE_TYPE"] = config.StorageType
@@ -421,9 +421,9 @@ func Test_checkFilePerms(t *testing.T) {
 	}
 
 	type test struct {
-		name	string
-		files	[]string
-		wantErr	bool
+		name    string
+		files   []string
+		wantErr bool
 	}
 
 	tests := []test{
@@ -506,47 +506,47 @@ func TestEnvList(t *testing.T) {
 }
 
 type decodeTestCase struct {
-	name		string
-	pre		EnvList
-	given		string
-	valid		bool
-	expected	EnvList
+	name     string
+	pre      EnvList
+	given    string
+	valid    bool
+	expected EnvList
 }
 
 var envListDecodeTests = []decodeTestCase{
 	{
-		name:		"empty",
-		pre:		EnvList{},
-		given:		"",
-		valid:		true,
-		expected:	EnvList{},
+		name:     "empty",
+		pre:      EnvList{},
+		given:    "",
+		valid:    true,
+		expected: EnvList{},
 	},
 	{
-		name:		"unchanged",
-		pre:		EnvList{"GOPROXY=direct"},
-		given:		"",
-		valid:		true,
-		expected:	EnvList{"GOPROXY=direct"},
+		name:     "unchanged",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "",
+		valid:    true,
+		expected: EnvList{"GOPROXY=direct"},
 	},
 	{
-		name:		"must not merge",
-		pre:		EnvList{"GOPROXY=direct"},
-		given:		"GOPRIVATE=github.com/gomods/*",
-		valid:		true,
-		expected:	EnvList{"GOPRIVATE=github.com/gomods/*"},
+		name:     "must not merge",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPRIVATE=github.com/gomods/*",
+		valid:    true,
+		expected: EnvList{"GOPRIVATE=github.com/gomods/*"},
 	},
 	{
-		name:		"must override",
-		pre:		EnvList{"GOPROXY=direct"},
-		given:		"GOPROXY=https://proxy.golang.org",
-		valid:		true,
-		expected:	EnvList{"GOPROXY=https://proxy.golang.org"},
+		name:     "must override",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=https://proxy.golang.org",
+		valid:    true,
+		expected: EnvList{"GOPROXY=https://proxy.golang.org"},
 	},
 	{
-		name:	"semi colon separator",
-		pre:	EnvList{"GOPROXY=direct", "GOPRIVATE="},
-		given:	"GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
-		valid:	true,
+		name:  "semi colon separator",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=off; GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
 		expected: EnvList{
 			"GOPROXY=off",
 			"GOPRIVATE=marwan.io/*",
@@ -555,10 +555,10 @@ var envListDecodeTests = []decodeTestCase{
 		},
 	},
 	{
-		name:	"with commas",
-		pre:	EnvList{"GOPROXY=direct", "GOPRIVATE="},
-		given:	"GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
-		valid:	true,
+		name:  "with commas",
+		pre:   EnvList{"GOPROXY=direct", "GOPRIVATE="},
+		given: "GOPROXY=proxy.golang.org,direct;GOPRIVATE=marwan.io/*;GONUTS=lol;GODEBUG=dns=true",
+		valid: true,
 		expected: EnvList{
 			"GOPROXY=proxy.golang.org,direct",
 			"GOPRIVATE=marwan.io/*",
@@ -567,17 +567,17 @@ var envListDecodeTests = []decodeTestCase{
 		},
 	},
 	{
-		name:	"invalid",
-		pre:	EnvList{},
-		given:	"GOPROXY=direct; INVALID",
-		valid:	false,
+		name:  "invalid",
+		pre:   EnvList{},
+		given: "GOPROXY=direct; INVALID",
+		valid: false,
 	},
 	{
-		name:		"accept empty value",
-		pre:		EnvList{"GOPROXY=direct"},
-		given:		"GOPROXY=; GOPRIVATE=github.com/*",
-		valid:		true,
-		expected:	EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
+		name:     "accept empty value",
+		pre:      EnvList{"GOPROXY=direct"},
+		given:    "GOPROXY=; GOPRIVATE=github.com/*",
+		valid:    true,
+		expected: EnvList{"GOPROXY=", "GOPRIVATE=github.com/*"},
 	},
 }
 

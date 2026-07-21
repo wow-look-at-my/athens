@@ -8,117 +8,117 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 type input struct {
-	name		string
-	cloudProvider	string
-	format		string
-	level		logrus.Level
-	fields		logrus.Fields
-	logFunc		func(e Entry) time.Time
-	output		string
+	name          string
+	cloudProvider string
+	format        string
+	level         logrus.Level
+	fields        logrus.Fields
+	logFunc       func(e Entry) time.Time
+	output        string
 }
 
 var testCases = []input{
 	{
-		name:		"gcp_debug",
-		cloudProvider:	"GCP",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{},
+		name:          "gcp_debug",
+		cloudProvider: "GCP",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Infof("info message")
 			return t
 		},
-		output:	`{"message":"info message","severity":"info","timestamp":"%v"}` + "\n",
+		output: `{"message":"info message","severity":"info","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:		"gcp_error",
-		cloudProvider:	"GCP",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{},
+		name:          "gcp_error",
+		cloudProvider: "GCP",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Errorf("err message")
 			return t
 		},
-		output:	`{"message":"err message","severity":"error","timestamp":"%v"}` + "\n",
+		output: `{"message":"err message","severity":"error","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:		"gcp_empty",
-		cloudProvider:	"GCP",
-		level:		logrus.ErrorLevel,
-		fields:		logrus.Fields{},
+		name:          "gcp_empty",
+		cloudProvider: "GCP",
+		level:         logrus.ErrorLevel,
+		fields:        logrus.Fields{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Infof("info message")
 			return t
 		},
-		output:	``,
+		output: ``,
 	},
 	{
-		name:		"gcp_fields",
-		cloudProvider:	"GCP",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{"field1": "value1", "field2": 2},
+		name:          "gcp_fields",
+		cloudProvider: "GCP",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"field1": "value1", "field2": 2},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Debugf("debug message")
 			return t
 		},
-		output:	`{"field1":"value1","field2":2,"message":"debug message","severity":"debug","timestamp":"%v"}` + "\n",
+		output: `{"field1":"value1","field2":2,"message":"debug message","severity":"debug","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:		"gcp_logs",
-		cloudProvider:	"GCP",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{},
+		name:          "gcp_logs",
+		cloudProvider: "GCP",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
 			return t
 		},
-		output:	`{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
+		output: `{"message":"warn message","severity":"warning","timestamp":"%v"}` + "\n",
 	},
 	{
-		name:		"default plain",
-		format:		"plain",
-		cloudProvider:	"none",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		name:          "default plain",
+		format:        "plain",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
 			return t
 		},
-		output:	`WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
+		output: `WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
 	},
 	{
-		name:		"default",
-		cloudProvider:	"none",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		name:          "default",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
 			return t
 		},
-		output:	`WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
+		output: `WARNING[%v]: warn message` + "\t" + `abc=xyz xyz=abc` + " \n",
 	},
 	{
-		name:		"default json",
-		format:		"json",
-		cloudProvider:	"none",
-		level:		logrus.DebugLevel,
-		fields:		logrus.Fields{"xyz": "abc", "abc": "xyz"},
+		name:          "default json",
+		format:        "json",
+		cloudProvider: "none",
+		level:         logrus.DebugLevel,
+		fields:        logrus.Fields{"xyz": "abc", "abc": "xyz"},
 		logFunc: func(e Entry) time.Time {
 			t := time.Now()
 			e.Warnf("warn message")
 			return t
 		},
-		output:	`{"abc":"xyz","level":"warning","msg":"warn message","time":"%v","xyz":"abc"}` + "\n",
+		output: `{"abc":"xyz","level":"warning","msg":"warn message","time":"%v","xyz":"abc"}` + "\n",
 	},
 }
 
