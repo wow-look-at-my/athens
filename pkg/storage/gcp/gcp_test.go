@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/storage/compliance"
+	"github.com/stretchr/testify/require"
 	"github.com/technosophos/moniker"
 	"google.golang.org/api/iterator"
 )
@@ -75,9 +75,9 @@ func getTestConfig(bucket string) *config.GCPConfig {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:		bucket,
-		JSONKey:	creds,
-		ProjectID:	os.Getenv("GCS_PROJECT_ID"),
+		Bucket:    bucket,
+		JSONKey:   creds,
+		ProjectID: os.Getenv("GCS_PROJECT_ID"),
 	}
 }
 

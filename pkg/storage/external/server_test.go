@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage/mem"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewServer_List(t *testing.T) {

@@ -7,22 +7,22 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/download/mode"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRedirect(t *testing.T) {
 	for _, url := range []string{"https://gomods.io", "https://internal.domain/repository/gonexus"} {
 		r := mux.NewRouter()
 		RegisterHandlers(r, &HandlerOpts{
-			Protocol:	&mockProtocol{},
-			Logger:		log.NoOpLogger(),
+			Protocol: &mockProtocol{},
+			Logger:   log.NoOpLogger(),
 			DownloadFile: &mode.DownloadFile{
-				Mode:		mode.Redirect,
-				DownloadURL:	url,
+				Mode:        mode.Redirect,
+				DownloadURL: url,
 			},
 		})
 		for _, path := range [...]string{

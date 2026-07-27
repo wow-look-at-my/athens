@@ -16,7 +16,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/compliance"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBackend(t *testing.T) {
@@ -50,9 +50,9 @@ func getStorage(tb testing.TB) *ModuleStore {
 func TestQueryModuleVersionExists(t *testing.T) {
 	modname, ver := "getTestModule", "v1.2.3"
 	mock := &storage.Version{
-		Info:	[]byte("123"),
-		Mod:	[]byte("456"),
-		Zip:	io.NopCloser(bytes.NewReader([]byte("789"))),
+		Info: []byte("123"),
+		Mod:  []byte("456"),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
 	ctx := context.Background()
@@ -71,9 +71,9 @@ func TestQueryModuleVersionExists(t *testing.T) {
 func TestQueryKindNotFoundErrorCases(t *testing.T) {
 	modname, ver := "getTestModule", "v1.2.3"
 	mock := &storage.Version{
-		Info:	[]byte("123"),
-		Mod:	[]byte("456"),
-		Zip:	io.NopCloser(bytes.NewReader([]byte("789"))),
+		Info: []byte("123"),
+		Mod:  []byte("456"),
+		Zip:  io.NopCloser(bytes.NewReader([]byte("789"))),
 	}
 
 	ctx := context.Background()
@@ -84,15 +84,15 @@ func TestQueryKindNotFoundErrorCases(t *testing.T) {
 	defer backend.Delete(ctx, modname, ver)
 
 	testCases := []struct {
-		modname	string
-		ver	string
+		modname string
+		ver     string
 	}{
-		{"getTestModule", "yyy"},	// test NotFound non-existent version
-		{"getTestModule", ""},		// test NotFound empty str version
-		{"xxx", "v1.2.3"},		// test NotFound non-existent module
-		{"", "v1.2.3"},			// test NotFound empty str module
-		{"", ""},			// test NotFound empty str module and version
-		{"xxx", "yyy"},			// test NotFound non-existent module and version
+		{"getTestModule", "yyy"}, // test NotFound non-existent version
+		{"getTestModule", ""},    // test NotFound empty str version
+		{"xxx", "v1.2.3"},        // test NotFound non-existent module
+		{"", "v1.2.3"},           // test NotFound empty str module
+		{"", ""},                 // test NotFound empty str module and version
+		{"xxx", "yyy"},           // test NotFound non-existent module and version
 	}
 
 	for _, test := range testCases {
@@ -115,10 +115,10 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 	defer client.Disconnect(ctx)
 	coll := client.Database("athens").Collection("modules")
 	errDocs := []struct {
-		Module	string		`bson:"module"`
-		Version	string		`bson:"version"`
-		Mod	interface{}	`bson:"mod"`
-		Info	interface{}	`bson:"info"`
+		Module  string      `bson:"module"`
+		Version string      `bson:"version"`
+		Mod     interface{} `bson:"mod"`
+		Info    interface{} `bson:"info"`
 	}{
 		{"model1", "v1.1.1", 12345678, "error document with integer mod"},
 		{"model2", "v2.0.0", true, "error document with boolean mod"},
@@ -134,11 +134,11 @@ func TestQueryKindUnexpectedErrorCases(t *testing.T) {
 		}
 	}
 	testCases := []struct {
-		modName	string
-		version	string
+		modName string
+		version string
 	}{
-		{"model1", "v1.1.1"},	// test case: decode integer to []byte
-		{"model2", "v2.0.0"},	// test case: decode boolean to []byte
+		{"model1", "v1.1.1"}, // test case: decode integer to []byte
+		{"model2", "v2.0.0"}, // test case: decode boolean to []byte
 	}
 	for _, test := range testCases {
 		_, err := query(ctx, mongoStorage, test.modName, test.version)
@@ -155,18 +155,18 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name		string
-		dbName		string
-		expDbName	string
-		collName	string
-		expCollName	string
+		name        string
+		dbName      string
+		expDbName   string
+		collName    string
+		expCollName string
 	}{
-		{"Test Default 'Athens' DB Name", "athens", "athens", "modules", "modules"},		// Tests the default database name
-		{"Test Custom DB Name", "testAthens", "testAthens", "modules", "modules"},		// Tests a non-default database name
-		{"Test Blank DB Name", "", "athens", "modules", "modules"},				// Tests the blank database name edge-case
-		{"Test Default 'Modules' Collection Name", "athens", "athens", "modules", "modules"},	// Tests the default collection name
-		{"Test Custom Collection Name", "athens", "athens", "testModules", "testModules"},	// Tests the non-default collection name
-		{"Test Blank Collection Name", "athens", "athens", "", "modules"},			// Tests the blank collection name edge-case
+		{"Test Default 'Athens' DB Name", "athens", "athens", "modules", "modules"},          // Tests the default database name
+		{"Test Custom DB Name", "testAthens", "testAthens", "modules", "modules"},            // Tests a non-default database name
+		{"Test Blank DB Name", "", "athens", "modules", "modules"},                           // Tests the blank database name edge-case
+		{"Test Default 'Modules' Collection Name", "athens", "athens", "modules", "modules"}, // Tests the default collection name
+		{"Test Custom Collection Name", "athens", "athens", "testModules", "testModules"},    // Tests the non-default collection name
+		{"Test Blank Collection Name", "athens", "athens", "", "modules"},                    // Tests the blank collection name edge-case
 
 	}
 
@@ -182,13 +182,13 @@ func TestNewStorageWithDefaultOverrides(t *testing.T) {
 
 func TestMongoConfigVerification(t *testing.T) {
 	testCases := []struct {
-		testName	string
-		url		string
-		requireError	bool
+		testName     string
+		url          string
+		requireError bool
 	}{
-		{"Test Invalid Configuration:Empty URL", "", true},				// test mongo configuration without url
-		{"Test InValid Configuration:Misconfigured URL Scheme", "127.0.0.1", true},	// test mongo configuration with misconfigured url
-		{"Test Valid Configuration: Full URL", "mongodb://127.0.0.1", false},		// test mongo configuration with url
+		{"Test Invalid Configuration:Empty URL", "", true},                         // test mongo configuration without url
+		{"Test InValid Configuration:Misconfigured URL Scheme", "127.0.0.1", true}, // test mongo configuration with misconfigured url
+		{"Test Valid Configuration: Full URL", "mongodb://127.0.0.1", false},       // test mongo configuration with url
 	}
 
 	for _, test := range testCases {

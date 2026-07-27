@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/wow-look-at-my/testify/require"
 )
 
 func TestContentType(t *testing.T) {

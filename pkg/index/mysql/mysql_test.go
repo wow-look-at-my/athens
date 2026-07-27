@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/index/compliance"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMySQL(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/aws/smithy-go"
 	"github.com/gomods/athens/pkg/errors"
+	"github.com/stretchr/testify/require"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -38,8 +38,8 @@ func (s *Storage) clear() error {
 
 	for _, o := range objects.Contents {
 		delParams := &s3.DeleteObjectInput{
-			Bucket:	aws.String(s.bucket),
-			Key:	o.Key,
+			Bucket: aws.String(s.bucket),
+			Key:    o.Key,
 		}
 
 		_, err := s.s3API.DeleteObject(ctx, delParams)
@@ -88,11 +88,11 @@ func getStorage(t testing.TB) *Storage {
 
 	backend, err := New(
 		&config.S3Config{
-			Key:		"minio",
-			Secret:		"minio123",
-			Bucket:		"gomodsaws",
-			Region:		"us-west-1",
-			ForcePathStyle:	true,
+			Key:            "minio",
+			Secret:         "minio123",
+			Bucket:         "gomodsaws",
+			Region:         "us-west-1",
+			ForcePathStyle: true,
 		},
 		config.GetTimeoutDuration(300),
 		options,

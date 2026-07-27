@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateStorage_Memory(t *testing.T) {

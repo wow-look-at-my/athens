@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/storage/compliance"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBackend(t *testing.T) {
@@ -22,19 +22,19 @@ func TestNewStorageExists(t *testing.T) {
 	}
 
 	tests := []struct {
-		name		string
-		deleteBucket	bool
+		name         string
+		deleteBucket bool
 	}{
-		{"testbucket", false},	// test creation
-		{"testbucket", true},	// test exists
+		{"testbucket", false}, // test creation
+		{"testbucket", true},  // test exists
 	}
 
 	for _, test := range tests {
 		backend, err := NewStorage(&config.MinioConfig{
-			Endpoint:	url,
-			Key:		"minio",
-			Secret:		"minio123",
-			Bucket:		test.name,
+			Endpoint: url,
+			Key:      "minio",
+			Secret:   "minio123",
+			Bucket:   test.name,
 		}, config.GetTimeoutDuration(300))
 		require.Nil(t, err)
 
@@ -61,10 +61,10 @@ func TestNewStorageError(t *testing.T) {
 
 	for _, bucketName := range tests {
 		_, err := NewStorage(&config.MinioConfig{
-			Endpoint:	url,
-			Key:		"minio",
-			Secret:		"minio123",
-			Bucket:		bucketName,
+			Endpoint: url,
+			Key:      "minio",
+			Secret:   "minio123",
+			Bucket:   bucketName,
 		}, config.GetTimeoutDuration(300))
 		require.NotNil(t, err)
 
@@ -96,10 +96,10 @@ func getStorage(t testing.TB) *storageImpl {
 	}
 
 	backend, err := NewStorage(&config.MinioConfig{
-		Endpoint:	url,
-		Key:		"minio",
-		Secret:		"minio123",
-		Bucket:		"gomods",
+		Endpoint: url,
+		Key:      "minio",
+		Secret:   "minio123",
+		Bucket:   "gomods",
 	}, config.GetTimeoutDuration(300))
 	require.Nil(t, err)
 
