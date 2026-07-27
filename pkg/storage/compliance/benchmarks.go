@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 // RunBenchmarks takes a backend and runs benchmarks against

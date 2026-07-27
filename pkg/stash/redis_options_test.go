@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetRedisClientOptions_HostPort(t *testing.T) {

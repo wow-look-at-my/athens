@@ -46,6 +46,31 @@ func addProxyRoutes(
 	}
 	r.HandleFunc("/index", indexHandler(indexer))
 
+	// Build the module fetcher and stasher up front. The stasher is the
+	// component that downloads a module from upstream and saves it into
+	// storage; both the download protocol (below) and the local sumdb need
+	// it, so it has to exist before either is wired up.
+	fs := afero.NewOsFs()
+
+	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
+		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
+	}
+	if err := c.GoBinaryEnvVars.Validate(); err != nil {
+		return err
+	}
+	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
+	if err != nil {
+		return err
+	}
+
+	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.TimeoutDuration())
+	checker := storage.WithChecker(s)
+	withSingleFlight, err := getSingleFlight(l, c, s, checker)
+	if err != nil {
+		return err
+	}
+	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
+
 	// Local sumdb: compute and serve module hashes locally
 	// so Go clients can verify modules without contacting sum.golang.org.
 	if c.LocalSumDB {
@@ -57,7 +82,12 @@ func addProxyRoutes(
 		if sumdbName == "" {
 			sumdbName = "athens.local"
 		}
-		localSumDB, err := sumlocal.New(sumdbDir, sumdbName, s)
+		// Pass the stasher so the sumdb can fetch a module on demand when a
+		// client asks to verify one that has not been stored yet (e.g. the
+		// golang.org/toolchain module Go pulls during a toolchain switch,
+		// which may be downloaded via a GOPROXY "direct" fallback and thus
+		// never hit Athens's module endpoints).
+		localSumDB, err := sumlocal.New(sumdbDir, sumdbName, s, st)
 		if err != nil {
 			return fmt.Errorf("local sumdb: %w", err)
 		}
@@ -115,27 +145,6 @@ func addProxyRoutes(
 	// 2. The singleflight passes the stash to its parent: stashpool.
 	// 3. The stashpool manages limiting concurrent requests and passes them to stash.
 	// 4. The plain stash.New just takes a request from upstream and saves it into storage.
-	fs := afero.NewOsFs()
-
-	if !c.GoBinaryEnvVars.HasKey("GONOSUMDB") {
-		c.GoBinaryEnvVars.Add("GONOSUMDB", strings.Join(c.NoSumPatterns, ","))
-	}
-	if err := c.GoBinaryEnvVars.Validate(); err != nil {
-		return err
-	}
-	mf, err := module.NewGoGetFetcher(c.GoBinary, c.GoGetDir, c.GoBinaryEnvVars, fs)
-	if err != nil {
-		return err
-	}
-
-	lister := module.NewVCSLister(c.GoBinary, c.GoBinaryEnvVars, fs, c.TimeoutDuration())
-	checker := storage.WithChecker(s)
-	withSingleFlight, err := getSingleFlight(l, c, s, checker)
-	if err != nil {
-		return err
-	}
-	st := stash.New(mf, s, indexer, stash.WithPool(c.GoGetWorkers), withSingleFlight)
-
 	df, err := mode.NewFile(c.DownloadMode, c.DownloadURL)
 	if err != nil {
 		return err

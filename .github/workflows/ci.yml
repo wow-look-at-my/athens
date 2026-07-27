@@ -4,9 +4,80 @@ on:
   push:
 
 permissions:
+  id-token: write
   contents: write
+  actions: read
+  checks: read
+  # autorelease (on by default) publishes through buildhost-publish, which
+  # registers a GitHub Deployment and posts an artifact storage record as part
+  # of publishing -- no opt-out, and the build fails without either grant.
+  deployments: write
+  artifact-metadata: write
 
 jobs:
-  build:
-    uses: wow-look-at-my/go-toolchain/.github/workflows/build.yml@v1
-    secrets: inherit
+  test:
+    runs-on: ubuntu-latest
+
+    # Backend services so the storage/index integration tests actually run
+    # (and count toward coverage) instead of skipping. MinIO needs a "server"
+    # command argument, so it is started via docker in a step below rather than
+    # as a service container.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1}).ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
+          MARIADB_DATABASE: athens
+          MARIADB_ROOT_HOST: '%'
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: athens
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s --health-timeout 5s --health-retries 30
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+
+    env:
+      ATHENS_MONGO_STORAGE_URL: mongodb://127.0.0.1:27017
+      ATHENS_MINIO_ENDPOINT: http://127.0.0.1:9001
+      TEST_INDEX_MYSQL: "true"
+      TEST_INDEX_POSTGRES: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio -p 9001:9000 \
+            -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 \
+            minio/minio server /data
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:9001/minio/health/live >/dev/null 2>&1; then
+              echo "minio ready"; break
+            fi
+            sleep 2
+          done
+
+      - uses: wow-look-at-my/go-toolchain@v1

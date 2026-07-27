@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
@@ -64,10 +64,10 @@ func testListSuffix(t *testing.T, b storage.Backend) {
 	ctx := context.Background()
 
 	modVers := map[string][]string{
-		"github.com/one/two":		{"v1.1.0", "v1.2.0", "v1.3.0"},
-		"github.com/one/two/v2":	{"v2.1.0"},
-		"github.com/one/two-other":	{"v0.9.0"},
-		"github.com/one":		{},	// not a module but a valid query, so no versions
+		"github.com/one/two":       {"v1.1.0", "v1.2.0", "v1.3.0"},
+		"github.com/one/two/v2":    {"v2.1.0"},
+		"github.com/one/two-other": {"v0.9.0"},
+		"github.com/one":           {}, // not a module but a valid query, so no versions
 	}
 	for modname, versions := range modVers {
 		for _, version := range versions {
@@ -213,9 +213,9 @@ func testDelete(t *testing.T, b storage.Backend) {
 
 func getMockModule() *storage.Version {
 	return &storage.Version{
-		Info:	[]byte("123"),
-		Mod:	[]byte("456"),
-		Zip:	io.NopCloser(bytes.NewReader([]byte("789"))),
-		ZipMD5:	md5.New().Sum([]byte("789")),
+		Info:   []byte("123"),
+		Mod:    []byte("456"),
+		Zip:    io.NopCloser(bytes.NewReader([]byte("789"))),
+		ZipMD5: md5.New().Sum([]byte("789")),
 	}
 }

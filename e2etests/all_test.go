@@ -14,22 +14,22 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/envy"
-	"github.com/wow-look-at-my/testify/suite"
+	"github.com/stretchr/testify/suite"
 )
 
 type E2eSuite struct {
 	suite.Suite
-	goBinaryPath	string
-	env		[]string
-	goPath		string
-	sampleRepoPath	string
-	stopAthens	context.CancelFunc
+	goBinaryPath   string
+	env            []string
+	goPath         string
+	sampleRepoPath string
+	stopAthens     context.CancelFunc
 }
 
 type catalogRes struct {
 	Modules []struct {
-		Module	string	`json:"module"`
-		Version	string	`json:"version"`
+		Module  string `json:"module"`
+		Version string `json:"version"`
 	} `json:"modules"`
 }
 
@@ -51,7 +51,7 @@ func (m *E2eSuite) SetupSuite() {
 	if err != nil {
 		m.Fail("Failed to build athens ", err)
 	}
-	stopAthens()	// in case a dangling instance was around.
+	stopAthens() // in case a dangling instance was around.
 	// ignoring error as if no athens is running it fails.
 
 	ctx := context.Background()

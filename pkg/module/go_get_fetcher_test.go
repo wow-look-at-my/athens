@@ -11,8 +11,8 @@ import (
 
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/spf13/afero"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var ctx = context.Background()
@@ -23,8 +23,8 @@ func TestGoGetFetcherInvalidModulePaths(t *testing.T) {
 	require.Nil(t, err)
 
 	tests := []struct {
-		name	string
-		mod	string
+		name string
+		mod  string
 	}{
 		{"bare host", "github.com"},
 		{"host with owner only", "github.com/owner"},
@@ -43,6 +43,33 @@ func TestGoGetFetcherInvalidModulePaths(t *testing.T) {
 
 		})
 	}
+}
+
+func TestWithProxyUserAgent(t *testing.T) {
+	t.Parallel()
+
+	const want = "GIT_HTTP_USER_AGENT=Athens module proxy (proxy.golang.org)"
+
+	t.Run("appends the agent and leaves GOSUMDB=off and other vars alone", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent([]string{"GOPATH=/x", "GOSUMDB=off", "GOPROXY=direct"})
+		// The toolchain is fetched like any other module: GOSUMDB is untouched,
+		// only GIT_HTTP_USER_AGENT is added to trigger cmd/go's proxy exception.
+		assert.Equal(t, []string{"GOPATH=/x", "GOSUMDB=off", "GOPROXY=direct", want}, got)
+	})
+
+	t.Run("replaces any pre-existing GIT_HTTP_USER_AGENT", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent([]string{"GIT_HTTP_USER_AGENT=something", "GOPROXY=direct"})
+		assert.Equal(t, []string{"GOPROXY=direct", want}, got)
+	})
+
+	t.Run("agent carries the substring cmd/go's useSumDB exception matches", func(t *testing.T) {
+		t.Parallel()
+		got := withProxyUserAgent(nil)
+		require.Len(t, got, 1)
+		assert.Contains(t, got[0], "proxy.golang.org")
+	})
 }
 
 func (s *ModuleSuite) TestNewGoGetFetcher() {
@@ -109,9 +136,9 @@ func (s *ModuleSuite) TestGoGetFetcherSumDB() {
 	zipBytes, err := os.ReadFile("test_data/mockmod.xyz@v1.2.3.zip")
 	r.NoError(err)
 	mp := &mockProxy{paths: map[string][]byte{
-		"/mockmod.xyz/@v/v1.2.3.info":	[]byte(`{"Version":"v1.2.3"}`),
-		"/mockmod.xyz/@v/v1.2.3.mod":	[]byte(`{"module mod}`),
-		"/mockmod.xyz/@v/v1.2.3.zip":	zipBytes,
+		"/mockmod.xyz/@v/v1.2.3.info": []byte(`{"Version":"v1.2.3"}`),
+		"/mockmod.xyz/@v/v1.2.3.mod":  []byte(`{"module mod}`),
+		"/mockmod.xyz/@v/v1.2.3.zip":  zipBytes,
 	}}
 	proxyAddr, close := s.getProxy(mp)
 	defer close()

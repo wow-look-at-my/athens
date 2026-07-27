@@ -26,8 +26,17 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 )
 
+// Fetcher downloads a module from upstream and saves it into the storage
+// backend. It is satisfied by stash.Stasher and lets the local sumdb populate
+// storage on demand for modules that have not been requested through the
+// module endpoints yet.
+type Fetcher interface {
+	Stash(ctx context.Context, mod, ver string) (string, error)
+}
+
 // Server implements sumdb.ServerOps for a local checksum database.
-// It lazily computes hashes from the storage backend on first lookup.
+// It lazily computes hashes from the storage backend on first lookup,
+// fetching the module into storage on demand if it is not present.
 type Server struct {
 	mu      sync.Mutex
 	dir     string
@@ -35,6 +44,8 @@ type Server struct {
 	vkey    string
 	name    string
 	storage storage.Backend
+	checker storage.Checker
+	fetcher Fetcher
 
 	nrecords int64
 	lookup   map[string]int64 // "module@version" → record ID
@@ -45,7 +56,10 @@ type Server struct {
 // dir is the directory for persistent state.
 // name is the server name for signatures (e.g. "athens.local").
 // s is the storage backend used to fetch module zips and go.mod files for hashing.
-func New(dir, name string, s storage.Backend) (*Server, error) {
+// fetcher, when non-nil, is used to download a module into storage on demand
+// when a lookup arrives for a module that is not yet stored. Pass nil to only
+// serve modules that are already present in storage.
+func New(dir, name string, s storage.Backend, fetcher Fetcher) (*Server, error) {
 	if err := os.MkdirAll(filepath.Join(dir, "records"), 0o750); err != nil {
 		return nil, fmt.Errorf("sumlocal: mkdir: %w", err)
 	}
@@ -54,6 +68,8 @@ func New(dir, name string, s storage.Backend) (*Server, error) {
 		dir:     dir,
 		name:    name,
 		storage: s,
+		checker: storage.WithChecker(s),
+		fetcher: fetcher,
 		lookup:  make(map[string]int64),
 	}
 
@@ -207,28 +223,67 @@ func (s *Server) ReadRecords(_ context.Context, id, n int64) ([][]byte, error) {
 }
 
 // Lookup implements sumdb.ServerOps.
-// If the module@version is not yet in the log, it fetches the zip and go.mod
-// from storage, computes the hashes, and adds the record.
+// If the module@version is not yet in the log, it ensures the module is present
+// in storage (fetching it on demand when a fetcher is configured), computes the
+// zip and go.mod hashes, and adds the record.
 func (s *Server) Lookup(ctx context.Context, m module.Version) (int64, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	key := m.Path + "@" + m.Version
+
+	s.mu.Lock()
 	if id, ok := s.lookup[key]; ok {
+		s.mu.Unlock()
 		return id, nil
 	}
+	s.mu.Unlock()
 
-	// Compute hashes from storage
+	// Make sure the module is in storage and compute its hashes. This is done
+	// without the lock held because fetching a module can be slow (the
+	// golang.org/toolchain module is tens of megabytes), and we do not want to
+	// block every other sumdb request while one module downloads.
+	if err := s.ensureStored(ctx, m.Path, m.Version); err != nil {
+		return 0, &os.PathError{Op: "lookup", Path: key, Err: os.ErrNotExist}
+	}
 	zipHash, modHash, err := s.computeHashes(ctx, m.Path, m.Version)
 	if err != nil {
 		return 0, &os.PathError{Op: "lookup", Path: key, Err: os.ErrNotExist}
 	}
 
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	// Another goroutine may have added this record while we were fetching.
+	if id, ok := s.lookup[key]; ok {
+		return id, nil
+	}
 	id, err := s.addRecord(m.Path, m.Version, zipHash, modHash)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+// ensureStored makes sure module@version is present in the storage backend,
+// fetching it on demand via the configured fetcher when it is missing. When no
+// fetcher is configured it only reports whether the module is already stored.
+func (s *Server) ensureStored(ctx context.Context, mod, ver string) error {
+	exists, err := s.checker.Exists(ctx, mod, ver)
+	if err == nil && exists {
+		return nil
+	}
+	if s.fetcher == nil {
+		if err != nil {
+			return err
+		}
+		return &os.PathError{Op: "exists", Path: mod + "@" + ver, Err: os.ErrNotExist}
+	}
+	// Stash downloads the module from upstream and saves it into storage. It is
+	// singleflighted, so concurrent lookups for the same module coalesce into a
+	// single download. Note this deliberately bypasses the HTTP module-filter
+	// middleware: a client asking the sumdb to verify a module needs the real
+	// checksum regardless of whether the proxy would serve the module bytes.
+	if _, err := s.fetcher.Stash(ctx, mod, ver); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ReadTileData implements sumdb.ServerOps (hash tiles only, L >= 0).

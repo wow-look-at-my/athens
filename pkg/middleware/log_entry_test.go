@@ -11,7 +11,7 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogContext(t *testing.T) {
