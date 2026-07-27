@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInitializeAuthFile_Empty(t *testing.T) {

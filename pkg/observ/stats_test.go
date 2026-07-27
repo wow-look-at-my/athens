@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRegisterStatsExporter_Empty(t *testing.T) {

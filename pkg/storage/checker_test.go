@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/errors"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 type mockBackend struct {

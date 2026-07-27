@@ -3,7 +3,7 @@ package download
 import (
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetRedirectURL(t *testing.T) {
