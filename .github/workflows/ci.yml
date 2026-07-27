@@ -8,6 +8,11 @@ permissions:
   contents: write
   actions: read
   checks: read
+  # autorelease (on by default) publishes through buildhost-publish, which
+  # registers a GitHub Deployment and posts an artifact storage record as part
+  # of publishing -- no opt-out, and the build fails without either grant.
+  deployments: write
+  artifact-metadata: write
 
 jobs:
   test:
