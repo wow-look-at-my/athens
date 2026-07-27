@@ -13,7 +13,7 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gorilla/mux"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 type successProtocol struct {
@@ -46,8 +46,8 @@ type mockSizeReadCloser struct {
 	size int64
 }
 
-func (m *mockSizeReadCloser) Close() error  { return nil }
-func (m *mockSizeReadCloser) Size() int64   { return m.size }
+func (m *mockSizeReadCloser) Close() error { return nil }
+func (m *mockSizeReadCloser) Size() int64  { return m.size }
 
 type notFoundProtocol struct {
 	Protocol

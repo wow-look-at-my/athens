@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.etcd.io/etcd/api/v3/etcdserverpb"
 	etcdembed "go.etcd.io/etcd/server/v3/embed"
 )
@@ -16,15 +16,15 @@ type testContextKey struct{}
 
 type testError string
 
-func (e testError) Error() string	{ return string(e) }
+func (e testError) Error() string { return string(e) }
 
 type mockChecker struct {
-	t			*testing.T
-	e			*etcdembed.Etcd
-	wantModule, wantVersion	string
+	t                       *testing.T
+	e                       *etcdembed.Etcd
+	wantModule, wantVersion string
 
-	exists	bool
-	err	error
+	exists bool
+	err    error
 }
 
 func (c *mockChecker) Exists(ctx context.Context, module, version string) (bool, error) {
@@ -41,11 +41,11 @@ func (c *mockChecker) Exists(ctx context.Context, module, version string) (bool,
 }
 
 type mockStasher struct {
-	t			*testing.T
-	wantModule, wantVersion	string
+	t                       *testing.T
+	wantModule, wantVersion string
 
-	newVersion	string
-	err		error
+	newVersion string
+	err        error
 }
 
 func (s *mockStasher) Stash(ctx context.Context, module, version string) (string, error) {
@@ -99,25 +99,25 @@ func TestEtcdStash(t *testing.T) {
 		endpoint, e := startEtcdServer(t)
 
 		const (
-			someModule	= "some module"
-			someVersion	= "some version"
+			someModule  = "some module"
+			someVersion = "some version"
 		)
 
 		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
-			t:		t,
-			e:		e,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
-			exists:		true,
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			exists:      true,
 		})
 		require.NoError(t, err)
 
 		newVersion, err := w(&mockStasher{
-			t:		t,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
 		}).Stash(ctx, someModule, someVersion)
 		require.NoError(t, err)
 
@@ -133,27 +133,27 @@ func TestEtcdStash(t *testing.T) {
 		endpoint, e := startEtcdServer(t)
 
 		const (
-			someModule	= "some module"
-			someVersion	= "some version"
+			someModule  = "some module"
+			someVersion = "some version"
 
-			someNewVersion	= "some new version"
+			someNewVersion = "some new version"
 		)
 
 		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
-			t:		t,
-			e:		e,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
 		})
 		require.NoError(t, err)
 
 		newVersion, err := w(&mockStasher{
-			t:		t,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
-			newVersion:	someNewVersion,
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			newVersion:  someNewVersion,
 		}).Stash(ctx, someModule, someVersion)
 		require.NoError(t, err)
 
@@ -164,20 +164,20 @@ func TestEtcdStash(t *testing.T) {
 		endpoint, e := startEtcdServer(t)
 
 		const (
-			someModule	= "some module"
-			someVersion	= "some version"
+			someModule  = "some module"
+			someVersion = "some version"
 
-			someError	testError	= "some error"
+			someError testError = "some error"
 		)
 
 		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
-			t:		t,
-			e:		e,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
-			err:		someError,
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			err:         someError,
 		})
 		require.NoError(t, err)
 
@@ -190,27 +190,27 @@ func TestEtcdStash(t *testing.T) {
 		endpoint, e := startEtcdServer(t)
 
 		const (
-			someModule	= "some module"
-			someVersion	= "some version"
+			someModule  = "some module"
+			someVersion = "some version"
 
-			someError	testError	= "some error"
+			someError testError = "some error"
 		)
 
 		ctx := context.WithValue(context.Background(), testContextKey{}, struct{}{})
 
 		w, err := WithEtcd([]string{endpoint}, &mockChecker{
-			t:		t,
-			e:		e,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
+			t:           t,
+			e:           e,
+			wantModule:  someModule,
+			wantVersion: someVersion,
 		})
 		require.NoError(t, err)
 
 		newVersion, err := w(&mockStasher{
-			t:		t,
-			wantModule:	someModule,
-			wantVersion:	someVersion,
-			err:		someError,
+			t:           t,
+			wantModule:  someModule,
+			wantVersion: someVersion,
+			err:         someError,
 		}).Stash(ctx, someModule, someVersion)
 		assert.ErrorIs(t, err, someError)
 		assert.Empty(t, newVersion)

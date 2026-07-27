@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
-	"github.com/wow-look-at-my/testify/suite"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 // OpTests composes a testsuite to run all the Ops related tests in one group
@@ -62,9 +62,9 @@ func TestOps(t *testing.T) {
 
 func (op *OpTests) TestOps() {
 	const (
-		op1	Op	= "TestOps.op1"
-		op2	Op	= "TestOps.op2"
-		op3	Op	= "TestOps.op3"
+		op1 Op = "TestOps.op1"
+		op2 Op = "TestOps.op2"
+		op3 Op = "TestOps.op3"
 	)
 
 	err1 := E(op1, "op 1")
@@ -74,7 +74,7 @@ func (op *OpTests) TestOps() {
 	require.ElementsMatch(op.T(), []Op{op1, op2, op3}, Ops(err3.(Error)))
 }
 
-func (op *OpTests) SetupTest()	{}
+func (op *OpTests) SetupTest() {}
 
 func (op *OpTests) TestString() {
 	const op1 Op = "testOps.op1"

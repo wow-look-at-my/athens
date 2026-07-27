@@ -12,7 +12,7 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	storagemem "github.com/gomods/athens/pkg/storage/mem"
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetSingleFlight_Default(t *testing.T) {

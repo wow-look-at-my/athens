@@ -14,15 +14,15 @@ import (
 	"github.com/gomods/athens/pkg/log"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/gorilla/mux"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type routeTest struct {
-	method	string
-	path	string
-	body	string
-	test	func(t *testing.T, req *http.Request, resp *http.Response)
+	method string
+	path   string
+	body   string
+	test   func(t *testing.T, req *http.Request, resp *http.Response)
 }
 
 func TestProxyRoutes(t *testing.T) {
@@ -32,7 +32,7 @@ func TestProxyRoutes(t *testing.T) {
 	l := log.NoOpLogger()
 	c, err := config.Load("")
 	require.NoError(t, err)
-	c.NoSumPatterns = []string{"*"}	// catch all patterns with noSumWrapper to ensure the sumdb handler doesn't make a real http request to the sumdb server.
+	c.NoSumPatterns = []string{"*"} // catch all patterns with noSumWrapper to ensure the sumdb handler doesn't make a real http request to the sumdb server.
 	c.PathPrefix = "/prefix"
 	subRouter := r.PathPrefix(c.PathPrefix).Subrouter()
 	err = addProxyRoutes(subRouter, s, l, c)

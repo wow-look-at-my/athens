@@ -23,8 +23,8 @@ import (
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
 	"github.com/spf13/afero"
-	"github.com/wow-look-at-my/testify/assert"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -45,29 +45,29 @@ func getDP(t *testing.T) Protocol {
 
 	st := stash.New(mf, s, nop.New())
 	return New(&Opts{
-		Storage:	s,
-		Stasher:	st,
-		Lister:		module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs, conf.TimeoutDuration()),
-		NetworkMode:	Strict,
+		Storage:     s,
+		Stasher:     st,
+		Lister:      module.NewVCSLister(goBin, conf.GoBinaryEnvVars, fs, conf.TimeoutDuration()),
+		NetworkMode: Strict,
 	})
 }
 
 type listTest struct {
-	name	string
-	path	string
-	tags	[]string
+	name string
+	path string
+	tags []string
 }
 
 var listTests = []listTest{
 	{
-		name:	"happy tags",
-		path:	"github.com/athens-artifacts/happy-path",
-		tags:	[]string{"v0.0.1", "v0.0.2", "v0.0.3"},
+		name: "happy tags",
+		path: "github.com/athens-artifacts/happy-path",
+		tags: []string{"v0.0.1", "v0.0.2", "v0.0.3"},
 	},
 	{
-		name:	"no tags",
-		path:	"github.com/athens-artifacts/no-tags",
-		tags:	[]string{},
+		name: "no tags",
+		path: "github.com/athens-artifacts/no-tags",
+		tags: []string{},
 	},
 }
 
@@ -85,65 +85,65 @@ func TestList(t *testing.T) {
 }
 
 type listModeTest struct {
-	name		string
-	path		string
-	storageTags	[]string
-	upstreamList	[]string
-	upstreamErr	error
-	networkmode	string
-	wantTags	[]string
-	wantErr		bool
+	name         string
+	path         string
+	storageTags  []string
+	upstreamList []string
+	upstreamErr  error
+	networkmode  string
+	wantTags     []string
+	wantErr      bool
 }
 
 var listModeTests = []listModeTest{
 	{
-		name:		"strict no tags",
-		networkmode:	Offline,
-		path:		"github.com/athens-artifacts/happy-path",
-		wantTags:	[]string{},
+		name:        "strict no tags",
+		networkmode: Offline,
+		path:        "github.com/athens-artifacts/happy-path",
+		wantTags:    []string{},
 	},
 	{
-		name:		"strict tags",
-		networkmode:	Strict,
-		path:		"github.com/athens-artifacts/happy-path",
-		storageTags:	[]string{"v0.0.4"},
-		upstreamList:	[]string{"v0.0.1", "v0.0.2", "v0.0.3"},
-		wantTags:	[]string{"v0.0.1", "v0.0.2", "v0.0.3", "v0.0.4"},
+		name:         "strict tags",
+		networkmode:  Strict,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{"v0.0.1", "v0.0.2", "v0.0.3"},
+		wantTags:     []string{"v0.0.1", "v0.0.2", "v0.0.3", "v0.0.4"},
 	},
 	{
-		name:		"offline",
-		networkmode:	Offline,
-		path:		"github.com/athens-artifacts/happy-path",
-		storageTags:	[]string{"v0.0.4"},
-		wantTags:	[]string{"v0.0.4"},
+		name:        "offline",
+		networkmode: Offline,
+		path:        "github.com/athens-artifacts/happy-path",
+		storageTags: []string{"v0.0.4"},
+		wantTags:    []string{"v0.0.4"},
 	},
 	{
-		name:		"fallback with err",
-		networkmode:	Fallback,
-		path:		"github.com/athens-artifacts/happy-path",
-		storageTags:	[]string{"v0.0.4"},
-		upstreamList:	[]string{},
-		upstreamErr:	errors.E("test", "unexpected error"),
-		wantTags:	[]string{"v0.0.4"},
+		name:         "fallback with err",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "unexpected error"),
+		wantTags:     []string{"v0.0.4"},
 	},
 	{
-		name:		"fallback upstream not found",
-		networkmode:	Fallback,
-		path:		"github.com/athens-artifacts/happy-path",
-		storageTags:	[]string{"v0.0.4"},
-		upstreamList:	[]string{},
-		upstreamErr:	errors.E("test", "remote: Repository not found", errors.KindNotFound),
-		wantTags:	[]string{"v0.0.4"},
+		name:         "fallback upstream not found",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{"v0.0.4"},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
+		wantTags:     []string{"v0.0.4"},
 	},
 	{
-		name:		"fallback error with no storage",
-		networkmode:	Fallback,
-		path:		"github.com/athens-artifacts/happy-path",
-		storageTags:	[]string{},
-		upstreamList:	[]string{},
-		upstreamErr:	errors.E("test", "remote: Repository not found", errors.KindNotFound),
-		wantTags:	nil,
-		wantErr:	true,
+		name:         "fallback error with no storage",
+		networkmode:  Fallback,
+		path:         "github.com/athens-artifacts/happy-path",
+		storageTags:  []string{},
+		upstreamList: []string{},
+		upstreamErr:  errors.E("test", "remote: Repository not found", errors.KindNotFound),
+		wantTags:     nil,
+		wantErr:      true,
 	},
 }
 
@@ -153,13 +153,13 @@ func TestListMode(t *testing.T) {
 		strg, err := mem.NewStorage()
 		require.NoError(t, err)
 		ml := &mockLister{
-			list:	tc.upstreamList,
-			err:	tc.upstreamErr,
+			list: tc.upstreamList,
+			err:  tc.upstreamErr,
 		}
 		dp := &protocol{
-			storage:	strg,
-			lister:		ml,
-			networkMode:	tc.networkmode,
+			storage:     strg,
+			lister:      ml,
+			networkMode: tc.networkmode,
 		}
 		for _, tag := range tc.storageTags {
 			err := strg.Save(ctx, tc.path, tag, []byte("mod"), bytes.NewReader([]byte("zip")), nil, []byte("info"))
@@ -205,27 +205,27 @@ func TestConcurrentLists(t *testing.T) {
 }
 
 type latestTest struct {
-	name	string
-	path	string
-	info	*storage.RevInfo
-	err	bool
+	name string
+	path string
+	info *storage.RevInfo
+	err  bool
 }
 
 var latestTests = []latestTest{
 	{
-		name:	"happy path",
-		path:	"github.com/athens-artifacts/no-tags",
+		name: "happy path",
+		path: "github.com/athens-artifacts/no-tags",
 		info: &storage.RevInfo{
-			Version:	"v0.0.0-20180803171426-1a540c5d67ab",
-			Time:		time.Date(2018, 8, 3, 17, 14, 26, 0, time.UTC),
+			Version: "v0.0.0-20180803171426-1a540c5d67ab",
+			Time:    time.Date(2018, 8, 3, 17, 14, 26, 0, time.UTC),
 		},
 	},
 	{
-		name:	"tagged latest",
-		path:	"github.com/athens-artifacts/happy-path",
+		name: "tagged latest",
+		path: "github.com/athens-artifacts/happy-path",
 		info: &storage.RevInfo{
-			Version:	"v0.0.3",
-			Time:		time.Date(2018, 8, 3, 17, 16, 0o0, 0, time.UTC),
+			Version: "v0.0.3",
+			Time:    time.Date(2018, 8, 3, 17, 16, 0o0, 0, time.UTC),
 		},
 	},
 }
@@ -246,29 +246,29 @@ func TestLatest(t *testing.T) {
 }
 
 type infoTest struct {
-	name	string
-	path	string
-	version	string
-	info	*storage.RevInfo
+	name    string
+	path    string
+	version string
+	info    *storage.RevInfo
 }
 
 var infoTests = []infoTest{
 	{
-		name:		"happy path",
-		path:		"github.com/athens-artifacts/happy-path",
-		version:	"v0.0.2",
+		name:    "happy path",
+		path:    "github.com/athens-artifacts/happy-path",
+		version: "v0.0.2",
 		info: &storage.RevInfo{
-			Version:	"v0.0.2",
-			Time:		time.Date(2018, 8, 3, 3, 45, 19, 0, time.UTC),
+			Version: "v0.0.2",
+			Time:    time.Date(2018, 8, 3, 3, 45, 19, 0, time.UTC),
 		},
 	},
 	{
-		name:		"pseudo version",
-		path:		"github.com/athens-artifacts/no-tags",
-		version:	"v0.0.0-20180803035119-e4e0177efdb5",
+		name:    "pseudo version",
+		path:    "github.com/athens-artifacts/no-tags",
+		version: "v0.0.0-20180803035119-e4e0177efdb5",
 		info: &storage.RevInfo{
-			Version:	"v0.0.0-20180803035119-e4e0177efdb5",
-			Time:		time.Date(2018, 8, 3, 3, 51, 19, 0, time.UTC),
+			Version: "v0.0.0-20180803035119-e4e0177efdb5",
+			Time:    time.Date(2018, 8, 3, 3, 51, 19, 0, time.UTC),
 		},
 	},
 }
@@ -295,28 +295,28 @@ func TestInfo(t *testing.T) {
 }
 
 type modTest struct {
-	name	string
-	path	string
-	version	string
-	err	bool
+	name    string
+	path    string
+	version string
+	err     bool
 }
 
 var modTests = []modTest{
 	{
-		name:		"no mod file",
-		path:		"github.com/athens-artifacts/no-tags",
-		version:	"v0.0.0-20180803035119-e4e0177efdb5",
+		name:    "no mod file",
+		path:    "github.com/athens-artifacts/no-tags",
+		version: "v0.0.0-20180803035119-e4e0177efdb5",
 	},
 	{
-		name:		"upstream mod file",
-		path:		"github.com/athens-artifacts/happy-path",
-		version:	"v0.0.3",
+		name:    "upstream mod file",
+		path:    "github.com/athens-artifacts/happy-path",
+		version: "v0.0.3",
 	},
 	{
-		name:		"incorrect github repo",
-		path:		"github.com/athens-artifacts/not-exists",
-		version:	"v1.0.0",
-		err:		true,
+		name:    "incorrect github repo",
+		path:    "github.com/athens-artifacts/not-exists",
+		version: "v1.0.0",
+		err:     true,
 	},
 }
 
@@ -422,9 +422,9 @@ type mockFetcher struct{}
 func (m *mockFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.Version, error) {
 	bts := []byte(mod + "@" + ver)
 	return &storage.Version{
-		Mod:	bts,
-		Info:	bts,
-		Zip:	io.NopCloser(bytes.NewReader(bts)),
+		Mod:  bts,
+		Info: bts,
+		Zip:  io.NopCloser(bytes.NewReader(bts)),
 	}, nil
 }
 
@@ -451,11 +451,11 @@ func TestAsyncRedirect(t *testing.T) {
 	require.NoError(t, err)
 	ms := &mockStasher{s, make(chan bool)}
 	dp := New(&Opts{
-		Stasher:	ms,
-		Storage:	s,
+		Stasher: ms,
+		Storage: s,
 		DownloadFile: &mode.DownloadFile{
-			Mode:		mode.Async,
-			DownloadURL:	"https://gomods.io",
+			Mode:        mode.Async,
+			DownloadURL: "https://gomods.io",
 		},
 	})
 	mod, ver := "github.com/athens-artifacts/happy-path", "v0.0.1"
@@ -469,13 +469,13 @@ func TestAsyncRedirect(t *testing.T) {
 }
 
 type mockStasher struct {
-	s	storage.Backend
-	ch	chan bool
+	s  storage.Backend
+	ch chan bool
 }
 
 func (ms *mockStasher) Stash(ctx context.Context, mod string, ver string) (string, error) {
 	err := ms.s.Save(ctx, mod, ver, []byte("mod"), strings.NewReader("zip"), nil, []byte("info"))
-	ms.ch <- true	// signal async stashing is done
+	ms.ch <- true // signal async stashing is done
 	return ver, err
 }
 
@@ -487,9 +487,9 @@ func (m *notFoundFetcher) Fetch(ctx context.Context, mod, ver string) (*storage.
 }
 
 type mockLister struct {
-	called	bool
-	list	[]string
-	err	error
+	called bool
+	list   []string
+	err    error
 }
 
 func (ml *mockLister) List(ctx context.Context, mod string) (*storage.RevInfo, []string, error) {
@@ -506,11 +506,11 @@ var _ log.Entry = &testEntry{}
 func (e *testEntry) Debugf(format string, args ...any) {
 	e.msg = format
 }
-func (*testEntry) Infof(format string, args ...any)		{}
-func (*testEntry) Warnf(format string, args ...any)		{}
-func (*testEntry) Errorf(format string, args ...any)		{}
-func (*testEntry) WithFields(fields map[string]any) log.Entry	{ return nil }
-func (*testEntry) SystemErr(err error)				{}
+func (*testEntry) Infof(format string, args ...any)           {}
+func (*testEntry) Warnf(format string, args ...any)           {}
+func (*testEntry) Errorf(format string, args ...any)          {}
+func (*testEntry) WithFields(fields map[string]any) log.Entry { return nil }
+func (*testEntry) SystemErr(err error)                        {}
 
 func Test_copyContextWithCustomTimeout(t *testing.T) {
 	testEntry := &testEntry{}
