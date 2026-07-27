@@ -8,57 +8,57 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/log"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/require"
 )
 
 var basicAuthTests = [...]struct {
-	name		string
-	user		string
-	pass		string
-	path		string
-	logs		string
-	expectedStatus	int
+	name           string
+	user           string
+	pass           string
+	path           string
+	logs           string
+	expectedStatus int
 }{
 	{
-		name:		"happy_path",
-		user:		"correctUser",
-		pass:		"correctPass",
-		path:		"/",
-		logs:		"",
-		expectedStatus:	200,
+		name:           "happy_path",
+		user:           "correctUser",
+		pass:           "correctPass",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 200,
 	},
 	{
-		name:		"incorrect_username",
-		user:		"wrongUser",
-		pass:		"correctPass",
-		path:		"/",
-		logs:		"",
-		expectedStatus:	401,
+		name:           "incorrect_username",
+		user:           "wrongUser",
+		pass:           "correctPass",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 401,
 	},
 	{
-		name:		"incorrect_password",
-		user:		"correctUser",
-		pass:		"wrongPassword",
-		path:		"/",
-		logs:		"",
-		expectedStatus:	401,
+		name:           "incorrect_password",
+		user:           "correctUser",
+		pass:           "wrongPassword",
+		path:           "/",
+		logs:           "",
+		expectedStatus: 401,
 	},
 	{
-		name:		"log_on_healthz",
-		user:		"wrongUser",
-		pass:		"wrongPassword",
-		path:		"/healthz",
-		logs:		"",
-		expectedStatus:	200,
+		name:           "log_on_healthz",
+		user:           "wrongUser",
+		pass:           "wrongPassword",
+		path:           "/healthz",
+		logs:           "",
+		expectedStatus: 200,
 	},
 	{
-		name:		"log_on_readyz",
-		user:		"wrongUser",
-		pass:		"wrongPassword",
-		path:		"/readyz",
-		logs:		"",
-		expectedStatus:	200,
+		name:           "log_on_readyz",
+		user:           "wrongUser",
+		pass:           "wrongPassword",
+		path:           "/readyz",
+		logs:           "",
+		expectedStatus: 200,
 	},
 }
 

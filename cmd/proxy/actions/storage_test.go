@@ -8,7 +8,7 @@ import (
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetStorage_Memory(t *testing.T) {

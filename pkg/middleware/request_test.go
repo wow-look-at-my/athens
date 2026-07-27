@@ -7,7 +7,7 @@ import (
 
 	"github.com/gomods/athens/pkg/log"
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRequestLogger(t *testing.T) {

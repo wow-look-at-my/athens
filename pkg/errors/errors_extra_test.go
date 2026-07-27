@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIs(t *testing.T) {

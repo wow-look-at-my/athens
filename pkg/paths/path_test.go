@@ -2,92 +2,92 @@ package paths
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
-	"github.com/wow-look-at-my/testify/assert"
 )
 
 func TestMatchesPattern(t *testing.T) {
 	type args struct {
-		pattern	string
-		name	string
+		pattern string
+		name    string
 	}
 	tests := []struct {
-		name	string
-		args	args
-		want	bool
+		name string
+		args args
+		want bool
 	}{
 		{
-			name:	"standard match",
+			name: "standard match",
 			args: args{
-				pattern:	"example.com/*",
-				name:		"example.com/athens",
+				pattern: "example.com/*",
+				name:    "example.com/athens",
 			},
-			want:	true,
+			want: true,
 		},
 		{
-			name:	"mutiple depth match",
+			name: "mutiple depth match",
 			args: args{
-				pattern:	"example.com/*",
-				name:		"example.com/athens/pkg",
+				pattern: "example.com/*",
+				name:    "example.com/athens/pkg",
 			},
-			want:	true,
+			want: true,
 		},
 		{
-			name:	"subdomain match",
+			name: "subdomain match",
 			args: args{
-				pattern:	"*.example.com/*",
-				name:		"go.example.com/athens/pkg",
+				pattern: "*.example.com/*",
+				name:    "go.example.com/athens/pkg",
 			},
-			want:	true,
+			want: true,
 		},
 		{
-			name:	"subdirectory exact match",
+			name: "subdirectory exact match",
 			args: args{
-				pattern:	"*.example.com/mod",
-				name:		"go.example.com/mod/example",
+				pattern: "*.example.com/mod",
+				name:    "go.example.com/mod/example",
 			},
-			want:	true,
+			want: true,
 		},
 		{
-			name:	"subdirectory mismatch",
+			name: "subdirectory mismatch",
 			args: args{
-				pattern:	"*.example.com/mod",
-				name:		"go.example.com/pkg/example",
+				pattern: "*.example.com/mod",
+				name:    "go.example.com/pkg/example",
 			},
-			want:	false,
+			want: false,
 		},
 		{
-			name:	"shorter name mismatch",
+			name: "shorter name mismatch",
 			args: args{
-				pattern:	"*.example.com/mod/pkg",
-				name:		"go.example.com/pkg",
+				pattern: "*.example.com/mod/pkg",
+				name:    "go.example.com/pkg",
 			},
-			want:	false,
+			want: false,
 		},
 		{
-			name:	"no subdirectory mismatch",
+			name: "no subdirectory mismatch",
 			args: args{
-				pattern:	"*.example.com/mod/pkg",
-				name:		"go.example.com/pkg",
+				pattern: "*.example.com/mod/pkg",
+				name:    "go.example.com/pkg",
 			},
-			want:	false,
+			want: false,
 		},
 		{
-			name:	"bad pattern",
+			name: "bad pattern",
 			args: args{
-				pattern:	"[]a]",
-				name:		"go.example.com/pkg",
+				pattern: "[]a]",
+				name:    "go.example.com/pkg",
 			},
-			want:	false,
+			want: false,
 		},
 		{
-			name:	"matches everything",
+			name: "matches everything",
 			args: args{
-				pattern:	"*",
-				name:		"github.com/gomods/athen",
+				pattern: "*",
+				name:    "github.com/gomods/athen",
 			},
-			want:	true,
+			want: true,
 		},
 	}
 	for _, tt := range tests {

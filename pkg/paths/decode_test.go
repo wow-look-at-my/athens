@@ -3,7 +3,7 @@ package paths
 import (
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDecodePath(t *testing.T) {
@@ -88,14 +88,14 @@ func TestDecodeString(t *testing.T) {
 			ok:       true,
 		},
 		{
-			name:   "non-ascii",
-			input:  "héllo",
-			ok:     false,
+			name:  "non-ascii",
+			input: "héllo",
+			ok:    false,
 		},
 		{
-			name:   "trailing bang",
-			input:  "hello!",
-			ok:     false,
+			name:  "trailing bang",
+			input: "hello!",
+			ok:    false,
 		},
 	}
 

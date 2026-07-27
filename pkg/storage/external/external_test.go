@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gomods/athens/pkg/storage/compliance"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExternal(t *testing.T) {

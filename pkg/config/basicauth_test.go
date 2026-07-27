@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBasicAuth_Both(t *testing.T) {
