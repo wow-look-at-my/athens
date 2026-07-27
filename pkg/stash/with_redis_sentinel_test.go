@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/mem"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -3,8 +3,8 @@ package stash
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"testing"
-	"github.com/wow-look-at-my/testify/require"
 )
 
 func TestPoolWrapper(t *testing.T) {
@@ -16,9 +16,9 @@ func TestPoolWrapper(t *testing.T) {
 }
 
 type mockPoolStasher struct {
-	inputMod	string
-	inputVer	string
-	err		error
+	inputMod string
+	inputVer string
+	err      error
 }
 
 func (m *mockPoolStasher) Stash(ctx context.Context, mod, ver string) (string, error) {

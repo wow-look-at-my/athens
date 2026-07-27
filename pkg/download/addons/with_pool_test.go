@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/download"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/paths"
 	"github.com/gomods/athens/pkg/storage"
+	"github.com/stretchr/testify/require"
 )
 
 // TestPoolLogic ensures that no
@@ -33,9 +33,9 @@ func TestPoolLogic(t *testing.T) {
 
 type mockPool struct {
 	download.Protocol
-	num	int
-	mu	sync.Mutex
-	ch	chan struct{}
+	num int
+	mu  sync.Mutex
+	ch  chan struct{}
 }
 
 func (m *mockPool) List(ctx context.Context, mod string) ([]string, error) {
@@ -96,15 +96,15 @@ func TestPoolWrapper(t *testing.T) {
 }
 
 type mockDP struct {
-	err		error
-	list		[]string
-	info		[]byte
-	latest		*storage.RevInfo
-	gomod		[]byte
-	zip		storage.SizeReadCloser
-	inputMod	string
-	inputVer	string
-	catalog		[]paths.AllPathParams
+	err      error
+	list     []string
+	info     []byte
+	latest   *storage.RevInfo
+	gomod    []byte
+	zip      storage.SizeReadCloser
+	inputMod string
+	inputVer string
+	catalog  []paths.AllPathParams
 }
 
 // List implements GET /{module}/@v/list

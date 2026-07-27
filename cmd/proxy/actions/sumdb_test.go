@@ -1,11 +1,11 @@
 package actions
 
 import (
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"github.com/wow-look-at-my/testify/require"
 )
 
 func TestSumdbProxy(t *testing.T) {
@@ -36,10 +36,10 @@ func TestSumdbProxy(t *testing.T) {
 }
 
 var noSumTestCases = []struct {
-	name		string
-	patterns	[]string
-	given		string
-	status		int
+	name     string
+	patterns []string
+	given    string
+	status   int
 }{
 	{
 		"no match",
@@ -104,4 +104,4 @@ func TestNoSumPatterns(t *testing.T) {
 	}
 }
 
-func emptyHandler(w http.ResponseWriter, r *http.Request)	{}
+func emptyHandler(w http.ResponseWriter, r *http.Request) {}

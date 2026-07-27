@@ -3,7 +3,7 @@ package build
 import (
 	"testing"
 
-	"github.com/wow-look-at-my/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {

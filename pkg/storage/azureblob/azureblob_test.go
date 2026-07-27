@@ -1,3 +1,5 @@
+//go:build azureblob
+
 package azureblob
 
 import (
@@ -7,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/config"
 	"github.com/gomods/athens/pkg/storage/compliance"
+	"github.com/stretchr/testify/require"
 	"github.com/technosophos/moniker"
 )
 
@@ -78,11 +80,11 @@ func getTestConfig(containerName string) *config.AzureBlobConfig {
 		return nil
 	}
 	return &config.AzureBlobConfig{
-		AccountName:			name,
-		AccountKey:			key,
-		ManagedIdentityResourceID:	resourceId,
-		CredentialScope:		credentialScope,
-		ContainerName:			containerName,
+		AccountName:               name,
+		AccountKey:                key,
+		ManagedIdentityResourceID: resourceId,
+		CredentialScope:           credentialScope,
+		ContainerName:             containerName,
 	}
 }
 

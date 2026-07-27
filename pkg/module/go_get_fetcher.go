@@ -154,7 +154,11 @@ func downloadModule(
 	fullURI := fmt.Sprintf("%s@%s", uri, version)
 
 	cmd := exec.CommandContext(ctx, goBinaryName, "mod", "download", "-json", fullURI)
-	cmd.Env = prepareEnv(gopath, envVars)
+	env := prepareEnv(gopath, envVars)
+	if uri == toolchainModulePath {
+		env = withProxyUserAgent(env)
+	}
+	cmd.Env = env
 	cmd.Dir = repoRoot
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
@@ -184,6 +188,42 @@ func downloadModule(
 	}
 
 	return m, nil
+}
+
+// toolchainModulePath is the synthetic module Go uses to distribute toolchains
+// for its automatic toolchain switching (since Go 1.21).
+const toolchainModulePath = "golang.org/toolchain"
+
+// proxyUserAgent is a GIT_HTTP_USER_AGENT value carrying the substring cmd/go
+// looks for to recognise that the caller is itself a Go module proxy doing the
+// initial toolchain download.
+//
+// cmd/go requires a checksum-database lookup for golang.org/toolchain and
+// ignores GONOSUMCHECK/GONOSUMDB/GOPRIVATE, so under GOSUMDB=off the download
+// otherwise fails with "checksum database disabled by GOSUMDB=off". cmd/go's
+// own escape hatch is "the Go proxy+checksum database cannot check itself while
+// doing the initial download": useSumDB() returns false for the toolchain when
+// GIT_HTTP_USER_AGENT contains "proxy.golang.org". Athens is exactly that -- a
+// module proxy fetching the toolchain to cache and re-serve it -- so we set the
+// agent and let the toolchain be fetched (and hashed by Athens) like any other
+// module, with no checksum database, and therefore no contact with
+// sum.golang.org.
+//
+// See cmd/go/internal/modfetch/sumdb.go, func useSumDB.
+const proxyUserAgent = "GIT_HTTP_USER_AGENT=Athens module proxy (proxy.golang.org)"
+
+// withProxyUserAgent returns env with GIT_HTTP_USER_AGENT set to proxyUserAgent,
+// replacing any existing value, so golang.org/toolchain can be fetched under
+// GOSUMDB=off via cmd/go's proxy self-download exception.
+func withProxyUserAgent(env []string) []string {
+	out := make([]string, 0, len(env)+1)
+	for _, kv := range env {
+		if strings.HasPrefix(kv, "GIT_HTTP_USER_AGENT=") {
+			continue
+		}
+		out = append(out, kv)
+	}
+	return append(out, proxyUserAgent)
 }
 
 func isLimitHit(o string) bool {

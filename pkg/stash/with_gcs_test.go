@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/gomods/athens/pkg/config"
-	"github.com/wow-look-at-my/testify/require"
 	"github.com/gomods/athens/pkg/errors"
 	"github.com/gomods/athens/pkg/storage"
 	"github.com/gomods/athens/pkg/storage/gcp"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -34,8 +34,8 @@ func TestWithGCS(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 	const (
-		mod	= "stashmod"
-		ver	= "v1.0.0"
+		mod = "stashmod"
+		ver = "v1.0.0"
 	)
 	strg := getStorage(t)
 	strg.Delete(ctx, mod, ver)
@@ -90,8 +90,8 @@ func TestWithGCSPartialFailure(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
 	const (
-		mod	= "stashmod"
-		ver	= "v1.0.0"
+		mod = "stashmod"
+		ver = "v1.0.0"
 	)
 	strg := getStorage(t)
 	strg.Delete(ctx, mod, ver)
@@ -140,8 +140,8 @@ func TestWithGCSPartialFailure(t *testing.T) {
 // so that redis can determine
 // whether to call the underlying stasher or not.
 type mockGCPStasher struct {
-	strg	storage.Backend
-	content	string
+	strg    storage.Backend
+	content string
 }
 
 func (ms *mockGCPStasher) Stash(ctx context.Context, mod, ver string) (string, error) {
@@ -176,7 +176,7 @@ func getTestConfig() *config.GCPConfig {
 		return nil
 	}
 	return &config.GCPConfig{
-		Bucket:		"athens_drone_stash_bucket",
-		JSONKey:	creds,
+		Bucket:  "athens_drone_stash_bucket",
+		JSONKey: creds,
 	}
 }
