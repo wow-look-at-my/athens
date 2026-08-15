@@ -1,3 +1,23 @@
+> [!IMPORTANT]
+> **This fork is deprecated. The org's Go module proxy is now served by
+> [buildhost](https://github.com/wow-look-at-my/buildhost) on
+> `goproxy.{domain}`**, alongside the APT, Homebrew, npm and OCI registries.
+> Nothing here is being developed further; it stays only until the deployment
+> is cut over.
+>
+> Why the move: this deployment answered `404` with an empty body for every
+> private first-party module while serving public ones from the same org
+> perfectly, because Athens fetches modules by shelling out to `git`, its
+> `ATHENS_GITHUB_TOKEN` was unset, and the resulting `exit status 128` was
+> reported as "module not found". The replacement fetches over HTTP with no
+> subprocess, never reports an authorization failure as a missing module, and
+> reports its own readiness so a proxy that can serve no private module stops
+> looking healthy. See
+> [`docs/formats/goproxy.md`](https://github.com/wow-look-at-my/buildhost/blob/master/docs/formats/goproxy.md).
+>
+> Upstream Athens itself is unaffected and still maintained at
+> [gomods/athens](https://github.com/gomods/athens) — use that, not this fork.
+
 # Welcome To Athens, Gophers!
 
 ![Athens Banner](./docs/static/banner.png)
