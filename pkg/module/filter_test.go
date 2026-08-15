@@ -2,19 +2,10 @@ package module
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
-
-func testConfigFile(t *testing.T) (testConfigFile string) {
-	testConfigFile = filepath.Join("..", "..", "config.dev.toml")
-	require.NoError(t, os.Chmod(testConfigFile, 0o700))
-
-	return testConfigFile
-}
 
 type FilterTests struct {
 	suite.Suite
